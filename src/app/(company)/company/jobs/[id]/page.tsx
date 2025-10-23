@@ -10,7 +10,7 @@ import EditJobForm from "@/components/jobs/edit-job-form";
 
 export const generateMetadata = async (): Promise<Metadata> => {
   return {
-    title: "Edit Job | KL2PEN",
+    title: "Edit Job | RabbitJob",
     description: "Update your job listing",
   };
 };

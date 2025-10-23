@@ -13,13 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Upload,
-  FileText,
-  Loader2,
-  Check,
-  AlertCircle,
-} from "lucide-react";
+import { Upload, FileText, Loader2, Check, AlertCircle } from "lucide-react";
 import {
   analyzeResume,
   AnalysisResult,
@@ -91,14 +85,14 @@ export default function ResumeAnalyzerPage() {
       <div className="container mx-auto px-4 max-w-3xl">
         {/* Header with decorative elements */}
         <div className="relative mb-16 text-center">
-          <div className="absolute top-0 right-0 w-20 h-20 bg-pink-100 rounded-full opacity-60 -z-10"></div>
-          <div className="absolute bottom-0 left-0 w-16 h-16 bg-pink-200 rounded-full opacity-40 -z-10"></div>
-          <div className="inline-flex items-center px-3 py-1 rounded-full bg-pink-100 text-pink-600 text-sm font-medium mb-4">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-blue-100 rounded-full opacity-60 -z-10"></div>
+          <div className="absolute bottom-0 left-0 w-16 h-16 bg-blue-200 rounded-full opacity-40 -z-10"></div>
+          <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-600 text-sm font-medium mb-4">
             RESUME TOOL
-            <FileText className="h-4 w-4 ml-2 text-pink-500" />
+            <FileText className="h-4 w-4 ml-2 text-blue-500" />
           </div>
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-800 mb-4">
-            Resume <span className="text-pink-600">PDF Analyzer</span>
+            Resume <span className="text-blue-600">PDF Analyzer</span>
           </h1>
           <p className="text-slate-600 max-w-2xl mx-auto">
             Get AI-powered feedback on your resume to improve your chances of

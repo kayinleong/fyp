@@ -4,8 +4,8 @@ import { validateSession } from "@/lib/actions/auth.action";
 import ProfileForm from "@/components/profile/profile-form";
 
 export const metadata: Metadata = {
-  title: "Profile | KL2PEN",
-  description: "Manage your KL2PEN profile",
+  title: "Profile | RabbitJob",
+  description: "Manage your RabbitJob profile",
 };
 
 export default async function ProfilePage() {

@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import NewJobForm from "@/components/jobs/new-job-form";
 
 export const metadata: Metadata = {
-  title: "Post a New Job | KL2PEN",
+  title: "Post a New Job | RabbitJob",
   description: "Create a new job listing for your company",
 };
 

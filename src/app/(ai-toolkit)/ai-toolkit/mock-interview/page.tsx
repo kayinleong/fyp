@@ -253,14 +253,14 @@ export default function MockInterviewPage() {
     <div className="container mx-auto px-4 py-8 max-w-3xl">
       {/* Header with decorative elements */}
       <div className="relative mb-12 text-center md:text-left">
-        <div className="absolute top-0 right-0 w-20 h-20 bg-pink-100 rounded-full opacity-60 -z-10"></div>
-        <div className="absolute bottom-0 left-0 w-16 h-16 bg-pink-200 rounded-full opacity-40 -z-10"></div>
-        <div className="inline-flex items-center px-3 py-1 rounded-full bg-pink-100 text-pink-600 text-sm font-medium mb-4">
+        <div className="absolute top-0 right-0 w-20 h-20 bg-blue-100 rounded-full opacity-60 -z-10"></div>
+        <div className="absolute bottom-0 left-0 w-16 h-16 bg-blue-200 rounded-full opacity-40 -z-10"></div>
+        <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-600 text-sm font-medium mb-4">
           AI INTERVIEW
-          <Mic className="h-4 w-4 ml-2 text-pink-500" />
+          <Mic className="h-4 w-4 ml-2 text-blue-500" />
         </div>
         <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-800 mb-4">
-          AI <span className="text-pink-600">Mock Interview</span>
+          AI <span className="text-blue-600">Mock Interview</span>
         </h1>
         <p className="text-slate-600 max-w-2xl mx-auto md:mx-0">
           Practice your interview skills with our AI interviewer and receive
@@ -270,7 +270,7 @@ export default function MockInterviewPage() {
 
       {step === "setup" && (
         <Card className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100 relative">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-pink-50 rounded-full -mr-8 -mt-8 z-0"></div>
+          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-full -mr-8 -mt-8 z-0"></div>
           <CardHeader className="relative z-10">
             <CardTitle className="text-xl font-bold text-slate-800">
               Interview Setup
@@ -349,7 +349,7 @@ export default function MockInterviewPage() {
                   )}
                 />
 
-                <div className="bg-pink-50 rounded-xl p-6 mt-6">
+                <div className="bg-blue-50 rounded-xl p-6 mt-6">
                   <p className="text-slate-700">
                     Our AI interviewer will ask you relevant questions based on
                     your desired job position and experience level. Speak your
@@ -366,7 +366,7 @@ export default function MockInterviewPage() {
                     isProcessing ||
                     setupForm.formState.isSubmitting
                   }
-                  className="w-full bg-pink-600 hover:bg-pink-700 rounded-xl py-6"
+                  className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl py-6"
                 >
                   {isProcessing ? (
                     <>
@@ -387,7 +387,7 @@ export default function MockInterviewPage() {
 
       {step === "interview" && questions.length > 0 && (
         <Card className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100 relative">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-pink-50 rounded-full -mr-8 -mt-8 z-0"></div>
+          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-full -mr-8 -mt-8 z-0"></div>
           <CardHeader className="flex flex-row justify-between items-center relative z-10">
             <CardTitle className="text-xl font-bold text-slate-800">
               Question {currentQuestion + 1} of {questions.length}
@@ -399,14 +399,14 @@ export default function MockInterviewPage() {
                 onClick={readQuestion}
                 disabled={isSpeaking}
                 title="Read question aloud"
-                className="text-pink-600 hover:text-pink-700 hover:bg-pink-50"
+                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
               >
                 <Volume2 className="h-5 w-5" />
               </Button>
             )}
           </CardHeader>
           <CardContent className="space-y-6 relative z-10">
-            <div className="bg-pink-50 p-6 rounded-xl relative">
+            <div className="bg-blue-50 p-6 rounded-xl relative">
               <div className="flex items-start justify-between">
                 <p className="font-medium pr-10 text-slate-800">
                   {questions[currentQuestion].question}
@@ -417,7 +417,7 @@ export default function MockInterviewPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="flex-shrink-0 text-pink-600 hover:bg-pink-100"
+                        className="flex-shrink-0 text-blue-600 hover:bg-blue-100"
                       >
                         <HelpCircle className="h-5 w-5" />
                       </Button>
@@ -471,7 +471,7 @@ export default function MockInterviewPage() {
                 className={`w-full rounded-xl py-6 ${
                   isRecording
                     ? "bg-red-500 hover:bg-red-600"
-                    : "bg-pink-600 hover:bg-pink-700"
+                    : "bg-blue-600 hover:bg-blue-700"
                 }`}
                 disabled={!hasRecognitionSupport && !isRecording}
               >
@@ -494,12 +494,12 @@ export default function MockInterviewPage() {
 
       {step === "feedback" && feedback && (
         <Card className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100 relative">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-pink-50 rounded-full -mr-8 -mt-8 z-0"></div>
+          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-full -mr-8 -mt-8 z-0"></div>
           <CardHeader className="flex flex-row justify-between items-center relative z-10">
             <div className="flex flex-col">
-              <div className="inline-flex items-center px-3 py-1 rounded-full bg-pink-100 text-pink-600 text-sm font-medium mb-2 self-start">
+              <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-600 text-sm font-medium mb-2 self-start">
                 RESULTS
-                <Sparkles className="h-4 w-4 ml-2 text-pink-500" />
+                <Sparkles className="h-4 w-4 ml-2 text-blue-500" />
               </div>
               <CardTitle className="text-xl font-bold text-slate-800">
                 Interview Feedback
@@ -510,7 +510,7 @@ export default function MockInterviewPage() {
               size="sm"
               onClick={exportToPdf}
               disabled={isExportingPdf || !user}
-              className="border-pink-200 text-pink-600 hover:bg-pink-50"
+              className="border-blue-200 text-blue-600 hover:bg-blue-50"
             >
               {isExportingPdf ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -522,14 +522,14 @@ export default function MockInterviewPage() {
           </CardHeader>
           <CardContent className="space-y-6 relative z-10">
             <div className="flex justify-center mb-4">
-              <div className="h-32 w-32 rounded-full bg-pink-100 flex items-center justify-center">
-                <span className="text-3xl font-bold text-pink-600">
+              <div className="h-32 w-32 rounded-full bg-blue-100 flex items-center justify-center">
+                <span className="text-3xl font-bold text-blue-600">
                   {feedback.overallScore}/10
                 </span>
               </div>
             </div>
 
-            <div className="bg-pink-50 rounded-xl p-6 mb-6">
+            <div className="bg-blue-50 rounded-xl p-6 mb-6">
               <h3 className="text-lg font-semibold mb-2 text-slate-800">
                 Strengths
               </h3>
@@ -568,14 +568,14 @@ export default function MockInterviewPage() {
                     Q: {item.question}
                   </p>
                   <div className="bg-gray-50 p-4 rounded-lg mb-3">
-                    <p className="text-sm text-pink-600 font-medium mb-1">
+                    <p className="text-sm text-blue-600 font-medium mb-1">
                       Your Response:
                     </p>
                     <p className="text-sm text-slate-700">
                       {userResponses[index] || "No response recorded"}
                     </p>
                   </div>
-                  <p className="text-sm text-pink-600 font-medium mb-1">
+                  <p className="text-sm text-blue-600 font-medium mb-1">
                     Feedback:
                   </p>
                   <p className="text-sm text-slate-700">{item.feedback}</p>
@@ -586,7 +586,7 @@ export default function MockInterviewPage() {
           <CardFooter className="relative z-10">
             <Button
               onClick={restartInterview}
-              className="w-full bg-pink-600 hover:bg-pink-700 rounded-xl py-6"
+              className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl py-6"
             >
               Start New Interview <ArrowRight className="h-4 w-4 ml-2" />
             </Button>

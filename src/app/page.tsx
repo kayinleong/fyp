@@ -9,8 +9,8 @@ export default function Home() {
       {/* The pt-16 class above creates space for the fixed header */}
 
       <main className="flex-grow -pt-16">
-        {/* Hero Section with Pink Gradient Background */}
-        <section className="relative bg-gradient-to-br from-pink-100 via-pink-300 to-pink-500 overflow-hidden">
+        {/* Hero Section with Blue Gradient Background */}
+        <section className="relative bg-gradient-to-br from-blue-100 via-blue-300 to-blue-500 overflow-hidden">
           {/* Background wave effect */}
           <div className="absolute inset-0 opacity-20">
             <svg
@@ -34,7 +34,7 @@ export default function Home() {
                   <span className="inline-block bg-gray-200 px-2 py-1">
                     Second
                   </span>
-                  <span className="inline-block bg-pink-500 text-white px-2 py-1 ml-2">
+                  <span className="inline-block bg-blue-500 text-white px-2 py-1 ml-2">
                     Chance.
                   </span>
                 </h1>
@@ -52,7 +52,7 @@ export default function Home() {
                 <div className="mt-8 flex flex-wrap gap-4 justify-center md:justify-start">
                   <Button
                     size="lg"
-                    className="bg-red-600 hover:bg-red-700 text-white rounded-full px-8"
+                    className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-8"
                   >
                     <Link href="/signup">Sign up for free</Link>
                   </Button>
@@ -69,17 +69,17 @@ export default function Home() {
                   <div className="relative h-full w-full bg-gray-50 pt-8 overflow-hidden">
                     {/* App Header */}
                     <div className="px-4 py-2 flex items-center justify-between bg-white shadow-sm">
-                      <div className="text-lg font-bold text-red-600">
-                        KL2PEN
+                      <div className="text-lg font-bold text-blue-600">
+                        RabbitJob
                       </div>
                       <div className="text-sm text-gray-500">Job Swipe</div>
                     </div>
 
                     {/* Job Card */}
                     <div className="relative mx-4 mt-4 bg-white rounded-xl shadow-lg border border-gray-200 h-[320px] overflow-hidden">
-                      <div className="h-32 bg-pink-500"></div>
+                      <div className="h-32 bg-blue-500"></div>
                       <div className="absolute top-24 left-4 w-16 h-16 rounded-full bg-white shadow-md flex items-center justify-center border-2 border-white overflow-hidden">
-                        <Briefcase className="h-8 w-8 text-pink-500" />
+                        <Briefcase className="h-8 w-8 text-blue-500" />
                       </div>
                       <div className="pt-10 px-4">
                         <h3 className="font-bold text-lg">
@@ -89,7 +89,7 @@ export default function Home() {
                           GrowthBrand Inc.
                         </p>
                         <div className="mt-2 flex items-center text-sm text-gray-500">
-                          <span className="bg-pink-100 text-pink-800 px-2 py-1 rounded text-xs mr-2">
+                          <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs mr-2">
                             Graduate-Friendly
                           </span>
                           <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
@@ -128,7 +128,7 @@ export default function Home() {
                     {/* Bottom Navigation */}
                     <div className="absolute bottom-0 left-0 right-0 h-16 bg-white border-t border-gray-200 flex items-center justify-around px-4">
                       <div className="flex flex-col items-center">
-                        <Briefcase className="h-6 w-6 text-red-600" />
+                        <Briefcase className="h-6 w-6 text-blue-600" />
                         <span className="text-xs mt-1">Jobs</span>
                       </div>
                       <div className="flex flex-col items-center">
@@ -164,12 +164,12 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Features Section - Pink Theme */}
-        <section className="py-20 bg-pink-50">
+        {/* Features Section - Blue Theme */}
+        <section className="py-20 bg-blue-50">
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-16 gap-4">
               <div></div>
-              <h2 className="text-3xl md:text-4xl font-extrabold tracking-tighter text-pink-900 text-center md:text-left">
+              <h2 className="text-3xl md:text-4xl font-extrabold tracking-tighter text-blue-900 text-center md:text-left">
                 What We Do
               </h2>
               <div></div>
@@ -177,11 +177,11 @@ export default function Home() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {/* First Card - User Profile and Career Swipe */}
-              <div className="bg-white rounded-lg p-8 shadow-lg border border-pink-100 flex flex-col h-full">
-                <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center mb-6">
-                  <Zap className="h-6 w-6 text-pink-600" />
+              <div className="bg-white rounded-lg p-8 shadow-lg border border-blue-100 flex flex-col h-full">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
+                  <Zap className="h-6 w-6 text-blue-600" />
                 </div>
-                <h3 className="text-xl font-bold mb-4 text-pink-900">
+                <h3 className="text-xl font-bold mb-4 text-blue-900">
                   User Profile and Career Swipe Module
                 </h3>
                 <p className="text-gray-600 mb-6 flex-grow">
@@ -193,18 +193,18 @@ export default function Home() {
                 </p>
                 <Link
                   href="/swipe"
-                  className="text-pink-600 hover:text-pink-700 flex items-center font-medium mt-auto"
+                  className="text-blue-600 hover:text-blue-700 flex items-center font-medium mt-auto"
                 >
                   START SWIPING <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </div>
 
               {/* Second Card - Internship and Job Management */}
-              <div className="bg-white rounded-lg p-8 shadow-lg border border-pink-100 flex flex-col h-full">
-                <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center mb-6">
-                  <Briefcase className="h-6 w-6 text-pink-600" />
+              <div className="bg-white rounded-lg p-8 shadow-lg border border-blue-100 flex flex-col h-full">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
+                  <Briefcase className="h-6 w-6 text-blue-600" />
                 </div>
-                <h3 className="text-xl font-bold mb-4 text-pink-900">
+                <h3 className="text-xl font-bold mb-4 text-blue-900">
                   Internship and Job Management
                 </h3>
                 <p className="text-gray-600 mb-6 flex-grow">
@@ -216,18 +216,18 @@ export default function Home() {
                 </p>
                 <Link
                   href="/jobs"
-                  className="text-pink-600 hover:text-pink-700 flex items-center font-medium mt-auto"
+                  className="text-blue-600 hover:text-blue-700 flex items-center font-medium mt-auto"
                 >
                   EXPLORE JOBS <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </div>
 
               {/* Third Card - Career AI Toolkit */}
-              <div className="bg-white rounded-lg p-8 shadow-lg border border-pink-100 flex flex-col h-full">
-                <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center mb-6">
-                  <Search className="h-6 w-6 text-pink-600" />
+              <div className="bg-white rounded-lg p-8 shadow-lg border border-blue-100 flex flex-col h-full">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
+                  <Search className="h-6 w-6 text-blue-600" />
                 </div>
-                <h3 className="text-xl font-bold mb-4 text-pink-900">
+                <h3 className="text-xl font-bold mb-4 text-blue-900">
                   Career AI Toolkit
                 </h3>
                 <p className="text-gray-600 mb-6 flex-grow">
@@ -239,7 +239,7 @@ export default function Home() {
                 </p>
                 <Link
                   href="/ai-toolkit"
-                  className="text-pink-600 hover:text-pink-700 flex items-center font-medium mt-auto"
+                  className="text-blue-600 hover:text-blue-700 flex items-center font-medium mt-auto"
                 >
                   TRY AI TOOLS <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
@@ -257,13 +257,13 @@ export default function Home() {
               </h2>
               <p className="text-lg text-gray-600 mb-8">
                 From finding your perfect job match to landing interviews,
-                KL2PEN&apos;s AI-powered platform helps you navigate your career
-                path with confidence and ease.
+                RabbitJob&apos;s AI-powered platform helps you navigate your
+                career path with confidence and ease.
               </p>
               <div className="flex justify-center">
                 <Button
                   asChild
-                  className="bg-pink-600 hover:bg-pink-700 text-white rounded-full px-8 py-4 text-lg"
+                  className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-8 py-4 text-lg"
                 >
                   <Link
                     href="/signup"

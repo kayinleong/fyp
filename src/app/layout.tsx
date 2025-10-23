@@ -12,8 +12,8 @@ import Footer from "@/components/footer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "KL2PEN - Professional Networking Platform",
-  description: "Connect, find jobs, and grow your career with KL2PEN",
+  title: "RabbitJob - Professional Networking Platform",
+  description: "Connect, find jobs, and grow your career with RabbitJob",
 };
 
 export default function RootLayout({

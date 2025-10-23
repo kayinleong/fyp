@@ -26,7 +26,7 @@ export default function ChatWidget() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "Hello! I'm your KL2PEN assistant. How can I help you with your career journey today?",
+      text: "Hello! I'm your RabbitJob assistant. How can I help you with your career journey today?",
       sender: "system",
       timestamp: new Date(Date.now()),
     },
@@ -173,10 +173,10 @@ export default function ChatWidget() {
               isFullWindow
                 ? "w-full h-full rounded-none"
                 : "w-full h-[85vh] sm:h-[70vh] md:h-96 md:w-80 rounded-t-xl md:rounded-xl"
-            } bg-white shadow-lg border border-pink-200 overflow-hidden origin-bottom-right`}
+            } bg-white shadow-lg border border-blue-200 overflow-hidden origin-bottom-right`}
           >
-            <div className="flex justify-between items-center p-3 bg-gradient-to-r from-pink-500 to-pink-600 text-white relative overflow-hidden">
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-pink-400 via-transparent to-transparent opacity-30"></div>
+            <div className="flex justify-between items-center p-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white relative overflow-hidden">
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-400 via-transparent to-transparent opacity-30"></div>
               <motion.div
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -186,12 +186,12 @@ export default function ChatWidget() {
                 <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center mr-2 backdrop-blur-sm">
                   <Sparkles className="h-4 w-4 text-white" />
                 </div>
-                <h3 className="font-semibold">KL2PEN Assistant</h3>
+                <h3 className="font-semibold">RabbitJob Assistant</h3>
               </motion.div>
               <div className="flex items-center space-x-2 z-10">
                 <button
                   onClick={toggleFullWindow}
-                  className="text-white hover:text-pink-100 transition-colors p-1"
+                  className="text-white hover:text-blue-100 transition-colors p-1"
                   aria-label={isFullWindow ? "Exit full window" : "Full window"}
                   title={isFullWindow ? "Exit full window" : "Full window"}
                 >
@@ -203,7 +203,7 @@ export default function ChatWidget() {
                 </button>
                 <button
                   onClick={toggleChat}
-                  className="text-white hover:text-pink-100 transition-colors p-1"
+                  className="text-white hover:text-blue-100 transition-colors p-1"
                   aria-label="Close chat"
                 >
                   <X size={18} />
@@ -216,7 +216,7 @@ export default function ChatWidget() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.3 }}
-              className={`flex-1 p-3 overflow-y-auto bg-gradient-to-b from-pink-50 to-white scroll-smooth ${
+              className={`flex-1 p-3 overflow-y-auto bg-gradient-to-b from-blue-50 to-white scroll-smooth ${
                 isFullWindow ? "px-4 md:px-6 lg:px-8" : ""
               }`}
               onAnimationComplete={() => scrollToBottom("auto")}
@@ -240,8 +240,8 @@ export default function ChatWidget() {
                     <div
                       className={`max-w-[85%] p-3 rounded-xl shadow-sm ${
                         msg.sender === "user"
-                          ? "bg-gradient-to-r from-pink-500 to-pink-600 text-white rounded-br-none"
-                          : "bg-white border border-pink-100 text-slate-800 rounded-bl-none"
+                          ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-none"
+                          : "bg-white border border-blue-100 text-slate-800 rounded-bl-none"
                       } ${isFullWindow ? "md:max-w-[70%] lg:max-w-[60%]" : ""}`}
                     >
                       {msg.sender === "system" ? (
@@ -263,8 +263,8 @@ export default function ChatWidget() {
                               <a
                                 className={`font-medium underline ${
                                   msg.sender === "user"
-                                    ? "text-pink-100"
-                                    : "text-pink-600"
+                                    ? "text-blue-100"
+                                    : "text-blue-600"
                                 }`}
                                 target="_blank"
                                 rel="noopener noreferrer"
@@ -296,8 +296,8 @@ export default function ChatWidget() {
                                 <code
                                   className={`px-1 py-0.5 rounded ${
                                     msg.sender === "user"
-                                      ? "bg-pink-400 text-white"
-                                      : "bg-pink-50 text-slate-800"
+                                      ? "bg-blue-400 text-white"
+                                      : "bg-blue-50 text-slate-800"
                                   }`}
                                   {...props}
                                 />
@@ -305,8 +305,8 @@ export default function ChatWidget() {
                                 <code
                                   className={`block p-2 mt-1 mb-1 overflow-x-auto rounded ${
                                     msg.sender === "user"
-                                      ? "bg-pink-700 text-white"
-                                      : "bg-pink-50 text-slate-800"
+                                      ? "bg-blue-700 text-white"
+                                      : "bg-blue-50 text-slate-800"
                                   }`}
                                   {...props}
                                 />
@@ -338,30 +338,30 @@ export default function ChatWidget() {
                             table: ({ ...props }) => (
                               <div className="overflow-x-auto my-2">
                                 <table
-                                  className="min-w-full border-collapse border border-pink-200 table-bordered"
+                                  className="min-w-full border-collapse border border-blue-200 table-bordered"
                                   {...props}
                                 />
                               </div>
                             ),
                             thead: ({ ...props }) => (
-                              <thead className="bg-pink-50" {...props} />
+                              <thead className="bg-blue-50" {...props} />
                             ),
                             tbody: ({ ...props }) => <tbody {...props} />,
                             tr: ({ ...props }) => (
                               <tr
-                                className="border-b border-pink-200"
+                                className="border-b border-blue-200"
                                 {...props}
                               />
                             ),
                             th: ({ ...props }) => (
                               <th
-                                className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider border-r border-pink-200 last:border-r-0"
+                                className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider border-r border-blue-200 last:border-r-0"
                                 {...props}
                               />
                             ),
                             td: ({ ...props }) => (
                               <td
-                                className="px-3 py-2 text-sm border-r border-pink-200 last:border-r-0"
+                                className="px-3 py-2 text-sm border-r border-blue-200 last:border-r-0"
                                 {...props}
                               />
                             ),
@@ -393,7 +393,7 @@ export default function ChatWidget() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.2 }}
-              className="p-3 border-t border-pink-100 bg-white"
+              className="p-3 border-t border-blue-100 bg-white"
             >
               <div
                 className={`flex items-center ${
@@ -407,13 +407,13 @@ export default function ChatWidget() {
                   placeholder="Type a message..."
                   disabled={isLoading}
                   rows={isFullWindow ? 2 : 1}
-                  className="flex-1 p-2 border border-pink-200 rounded-l-xl focus:outline-none focus:ring-1 focus:ring-pink-500 disabled:bg-gray-100 disabled:text-gray-400 resize-none"
+                  className="flex-1 p-2 border border-blue-200 rounded-l-xl focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-400 resize-none"
                   aria-label="Message input"
                 />
                 <button
                   onClick={handleSendMessage}
                   disabled={isLoading || !message.trim()}
-                  className="p-3 h-full bg-gradient-to-r from-pink-500 to-pink-600 text-white rounded-r-xl hover:from-pink-600 hover:to-pink-700 transition-colors disabled:opacity-70"
+                  className="p-3 h-full bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-r-xl hover:from-blue-600 hover:to-blue-700 transition-colors disabled:opacity-70"
                   aria-label="Send message"
                 >
                   {isLoading ? (
@@ -435,7 +435,7 @@ export default function ChatWidget() {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 15 }}
-            className="w-14 h-14 md:w-16 md:h-16 m-4 md:m-0 bg-gradient-to-r from-pink-500 to-pink-600 text-white rounded-full flex items-center justify-center shadow-lg hover:from-pink-600 hover:to-pink-700"
+            className="w-14 h-14 md:w-16 md:h-16 m-4 md:m-0 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full flex items-center justify-center shadow-lg hover:from-blue-600 hover:to-blue-700"
             aria-label="Open chat"
           >
             <div className="relative">

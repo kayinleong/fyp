@@ -275,16 +275,16 @@ export default function JobSwipePage() {
   if (authLoading || isLoading) {
     return (
       <div className="container mx-auto px-4 py-12">
-        {/* Pink themed header */}
+        {/* Blue themed header */}
         <div className="relative mb-10 text-center md:text-left">
-          <div className="absolute top-0 right-0 w-20 h-20 bg-pink-100 rounded-full opacity-60 -z-10"></div>
-          <div className="absolute bottom-0 left-0 w-16 h-16 bg-pink-200 rounded-full opacity-40 -z-10"></div>
-          <div className="inline-flex items-center px-3 py-1 rounded-full bg-pink-100 text-pink-600 text-sm font-medium mb-4">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-blue-100 rounded-full opacity-60 -z-10"></div>
+          <div className="absolute bottom-0 left-0 w-16 h-16 bg-blue-200 rounded-full opacity-40 -z-10"></div>
+          <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-600 text-sm font-medium mb-4">
             JOB FINDER
-            <Sparkles className="h-4 w-4 ml-2 text-pink-500" />
+            <Sparkles className="h-4 w-4 ml-2 text-blue-500" />
           </div>
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-800 mb-4">
-            Job <span className="text-pink-600">Swipe</span>
+            Job <span className="text-blue-600">Swipe</span>
           </h1>
           <p className="text-slate-600 max-w-2xl">
             Find your perfect job match with our intuitive swipe interface.
@@ -292,8 +292,8 @@ export default function JobSwipePage() {
         </div>
 
         <div className="flex flex-col items-center justify-center h-[500px]">
-          <div className="bg-pink-50 rounded-full p-4">
-            <Loader2 className="h-8 w-8 animate-spin text-pink-600" />
+          <div className="bg-blue-50 rounded-full p-4">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
           </div>
           <p className="mt-4 text-slate-600">Loading jobs for you...</p>
         </div>
@@ -306,16 +306,16 @@ export default function JobSwipePage() {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      {/* Pink themed header */}
+      {/* Blue themed header */}
       <div className="relative mb-10 text-center md:text-left">
-        <div className="absolute top-0 right-0 w-20 h-20 bg-pink-100 rounded-full opacity-60 -z-10"></div>
-        <div className="absolute bottom-0 left-0 w-16 h-16 bg-pink-200 rounded-full opacity-40 -z-10"></div>
-        <div className="inline-flex items-center px-3 py-1 rounded-full bg-pink-100 text-pink-600 text-sm font-medium mb-4">
+        <div className="absolute top-0 right-0 w-20 h-20 bg-blue-100 rounded-full opacity-60 -z-10"></div>
+        <div className="absolute bottom-0 left-0 w-16 h-16 bg-blue-200 rounded-full opacity-40 -z-10"></div>
+        <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-600 text-sm font-medium mb-4">
           JOB FINDER
-          <Sparkles className="h-4 w-4 ml-2 text-pink-500" />
+          <Sparkles className="h-4 w-4 ml-2 text-blue-500" />
         </div>
         <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-800 mb-4">
-          Job <span className="text-pink-600">Swipe</span>
+          Job <span className="text-blue-600">Swipe</span>
         </h1>
         <p className="text-slate-600 max-w-2xl">
           Find your perfect job match with our intuitive swipe interface.
@@ -339,7 +339,7 @@ export default function JobSwipePage() {
                     {dislikedJobIds.length} jobs.
                   </p>
                   <Button
-                    className="bg-pink-600 hover:bg-pink-700"
+                    className="bg-blue-600 hover:bg-blue-700"
                     onClick={handleRefresh}
                   >
                     Refresh Jobs
@@ -354,7 +354,7 @@ export default function JobSwipePage() {
                   style={{ x, rotate, opacity: cardOpacity }}
                   whileTap={{ cursor: "grabbing" }}
                 >
-                  <Card className="w-full h-full overflow-hidden border border-pink-100 shadow-md">
+                  <Card className="w-full h-full overflow-hidden border border-blue-100 shadow-md">
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
                       <motion.div
                         className="bg-green-500 text-white text-2xl font-bold rounded-full p-6 rotate-12"
@@ -370,7 +370,7 @@ export default function JobSwipePage() {
                       </motion.div>
                     </div>
 
-                    <CardHeader className="pb-2 bg-gradient-to-r from-pink-50 to-transparent">
+                    <CardHeader className="pb-2 bg-gradient-to-r from-blue-50 to-transparent">
                       <CardTitle className="text-xl text-slate-800">
                         {currentJob.title}
                       </CardTitle>
@@ -383,13 +383,13 @@ export default function JobSwipePage() {
                     <CardContent className="space-y-4 overflow-auto max-h-[300px]">
                       <div className="flex flex-wrap gap-4">
                         <div className="flex items-center">
-                          <MapPin className="h-4 w-4 mr-1 text-pink-500" />
+                          <MapPin className="h-4 w-4 mr-1 text-blue-500" />
                           <span className="text-slate-600">
                             {currentJob.company_location}
                           </span>
                         </div>
                         <div className="flex items-center">
-                          <DollarSign className="h-4 w-4 mr-1 text-pink-500" />
+                          <DollarSign className="h-4 w-4 mr-1 text-blue-500" />
                           <span className="text-slate-600">
                             {formatSalary(
                               currentJob.minimum_salary,
@@ -398,7 +398,7 @@ export default function JobSwipePage() {
                           </span>
                         </div>
                         <div className="flex items-center">
-                          <Briefcase className="h-4 w-4 mr-1 text-pink-500" />
+                          <Briefcase className="h-4 w-4 mr-1 text-blue-500" />
                           <span className="text-slate-600">
                             {currentJob.type}
                           </span>
@@ -419,7 +419,7 @@ export default function JobSwipePage() {
                             <Badge
                               key={tag}
                               variant="secondary"
-                              className="bg-pink-100 text-pink-800 hover:bg-pink-200"
+                              className="bg-blue-100 text-blue-800 hover:bg-blue-200"
                             >
                               {tag}
                             </Badge>
@@ -446,12 +446,12 @@ export default function JobSwipePage() {
                         <Button
                           variant="outline"
                           size="lg"
-                          className="rounded-full h-14 w-14 bg-white dark:bg-gray-800 border-pink-200 hover:bg-pink-50"
+                          className="rounded-full h-14 w-14 bg-white dark:bg-gray-800 border-blue-200 hover:bg-blue-50"
                           onClick={handleDislike}
                           disabled={swipeInProgress}
                         >
                           {swipeInProgress ? (
-                            <Loader2 className="h-6 w-6 animate-spin text-pink-600" />
+                            <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
                           ) : (
                             <ThumbsDown className="h-6 w-6 text-red-500" />
                           )}
@@ -460,12 +460,12 @@ export default function JobSwipePage() {
                         <Button
                           variant="outline"
                           size="lg"
-                          className="rounded-full h-14 w-14 bg-white dark:bg-gray-800 border-pink-200 hover:bg-pink-50"
+                          className="rounded-full h-14 w-14 bg-white dark:bg-gray-800 border-blue-200 hover:bg-blue-50"
                           onClick={handleLike}
                           disabled={swipeInProgress}
                         >
                           {swipeInProgress ? (
-                            <Loader2 className="h-6 w-6 animate-spin text-pink-600" />
+                            <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
                           ) : (
                             <ThumbsUp className="h-6 w-6 text-green-500" />
                           )}
@@ -491,8 +491,8 @@ export default function JobSwipePage() {
           </div>
         </div>
         <div className="w-full md:w-1/3">
-          <Card className="border border-pink-100 shadow-md">
-            <CardHeader className="bg-gradient-to-r from-pink-50 to-transparent">
+          <Card className="border border-blue-100 shadow-md">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-transparent">
               <CardTitle className="text-xl text-slate-800">
                 Your Job Preferences
               </CardTitle>
@@ -500,7 +500,7 @@ export default function JobSwipePage() {
             <CardContent className="text-sm text-slate-600">
               {loadingAnalysis ? (
                 <div className="flex items-center justify-center">
-                  <Loader2 className="h-6 w-6 animate-spin mr-2 text-pink-600" />
+                  <Loader2 className="h-6 w-6 animate-spin mr-2 text-blue-600" />
                   <span>Analyzing your preferences...</span>
                 </div>
               ) : (

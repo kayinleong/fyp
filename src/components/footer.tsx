@@ -63,11 +63,11 @@ export default function Footer() {
   const navigation = getNavigation();
 
   return (
-    <footer className="relative bg-gradient-to-b from-white to-pink-50 text-gray-800 py-12 overflow-hidden">
+    <footer className="relative bg-gradient-to-b from-white to-blue-50 text-gray-800 py-12 overflow-hidden">
       {/* Decorative elements */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-pink-200 via-pink-400 to-pink-200"></div>
-      <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-pink-100 opacity-30 -translate-y-1/2 translate-x-1/4"></div>
-      <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full bg-pink-100 opacity-30 translate-y-1/3 -translate-x-1/4"></div>
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-200 via-blue-400 to-blue-200"></div>
+      <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-blue-100 opacity-30 -translate-y-1/2 translate-x-1/4"></div>
+      <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full bg-blue-100 opacity-30 translate-y-1/3 -translate-x-1/4"></div>
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Logo and Description */}
@@ -76,7 +76,7 @@ export default function Footer() {
             href="/"
             className="text-3xl font-extrabold tracking-tighter inline-flex items-center"
           >
-            <div className="font-bold text-red-600">KL2PEN</div>
+            <div className="font-bold text-blue-600">RabbitJob</div>
           </Link>
           <p className="mt-3 text-gray-600 mx-auto max-w-md text-sm">
             Your career&apos;s second chance. We connect graduates and career
@@ -90,21 +90,21 @@ export default function Footer() {
             <Link
               key={item.name}
               href={item.href}
-              className="text-pink-600 hover:text-pink-700 transition-all hover:-translate-y-0.5 text-sm font-medium relative group"
+              className="text-blue-600 hover:text-blue-700 transition-all hover:-translate-y-0.5 text-sm font-medium relative group"
             >
               {item.name}
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-pink-400 transition-all group-hover:w-full"></span>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-400 transition-all group-hover:w-full"></span>
             </Link>
           ))}
         </div>
 
         {/* Copyright with heart icon */}
-        <div className="flex justify-center items-center pt-4 border-t border-pink-100">
+        <div className="flex justify-center items-center pt-4 border-t border-blue-100">
           <div className="flex items-center text-gray-500 text-xs mt-4">
             <span>Made with</span>
-            <Heart className="h-3 w-3 mx-1 text-pink-500 fill-pink-500 animate-pulse" />
+            <Heart className="h-3 w-3 mx-1 text-blue-500 fill-blue-500 animate-pulse" />
             <span>
-              by KL2PEN • Copyright © {new Date().getFullYear()} • All rights
+              by RabbitJob • Copyright © {new Date().getFullYear()} • All rights
               reserved
             </span>
           </div>

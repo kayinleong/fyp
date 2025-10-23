@@ -142,9 +142,9 @@ export default function Header() {
         <div className="flex items-center gap-8">
           <Link
             href="/"
-            className="text-3xl font-extrabold tracking-tighter text-red-600"
+            className="text-3xl font-extrabold tracking-tighter text-blue-600"
           >
-            <div className="dfont-bold text-red-600">KL2PEN</div>
+            <div className="dfont-bold text-blue-600">RabbitJob</div>
           </Link>
 
           {!isMobile && (
