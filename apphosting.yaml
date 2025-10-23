@@ -1,0 +1,44 @@
+# Settings for Backend (on Cloud Run).
+# See https://firebase.google.com/docs/app-hosting/configure#cloud-run
+runConfig:
+  minInstances: 0
+
+# Environment variables and secrets.
+env:
+  # Configure environment variables.
+  # See https://firebase.google.com/docs/app-hosting/configure#user-defined-environment
+  - variable: NPM_FLAGS
+    value: --force
+
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: AIzaSyDZ1tDPE3LaznwO3vcDLCyo66Fw3LVcgHE
+
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: kl2pen.firebaseapp.com
+
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: kl2pen
+
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: kl2pen.firebasestorage.app
+
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: 495671879802
+
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: 1:495671879802:web:ff6e321087a6518dbcb3c3
+
+  - variable: NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+    value: G-DFGK6KQW62
+
+  - variable: GEMINI_API_KEY
+    secret: GEMINI_API_KEY
+
+  - variable: NEXT_PRIVATE_SA_PROJECT_ID
+    secret: NEXT_PRIVATE_SA_PROJECT_ID
+
+  - variable: NEXT_PRIVATE_SA_PRIVATE_KEY
+    secret: NEXT_PRIVATE_SA_PRIVATE_KEY
+    
+  - variable: NEXT_PRIVATE_CLIENT_EMAIL
+    secret: NEXT_PRIVATE_CLIENT_EMAIL
