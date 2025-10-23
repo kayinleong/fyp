@@ -49,7 +49,7 @@
     "framer-motion": "^12.6.3",
     "genkit": "^1.5.0",
     "input-otp": "^1.4.2",
-    "jspdf": "^3.0.1",
+    "jspdf": "^3.0.3",
     "jspdf-autotable": "^5.0.2",
     "kl2pen": "file:",
     "langchain": "^0.3.20",
