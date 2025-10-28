@@ -13,6 +13,7 @@ export default async function JobList({
     remote?: string;
     minSalary?: string;
     maxSalary?: string;
+    location?: string;
   };
 }) {
   // Handle either filtering or listing all jobs
@@ -26,6 +27,7 @@ export default async function JobList({
           maxSalary: searchParams.maxSalary
             ? parseInt(searchParams.maxSalary)
             : undefined,
+          location: searchParams.location || undefined,
           status: JobStatus.OPEN,
         })
       : await listJobs(20, JobStatus.OPEN);
