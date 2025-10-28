@@ -18,6 +18,7 @@ export enum ApplicationStatus {
     INTERVIEW = 'INTERVIEW',
     OFFER = 'OFFER',
     REJECTED = 'REJECTED',
+    CANCELLED = 'CANCELLED',
 }
 
 export interface FirestoreApplication extends Omit<Application, 'created_at' | 'updated_at'> {

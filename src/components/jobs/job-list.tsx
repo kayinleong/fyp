@@ -14,6 +14,9 @@ export default async function JobList({
     minSalary?: string;
     maxSalary?: string;
     location?: string;
+    company?: string;
+    skills?: string;
+    jobType?: string;
   };
 }) {
   // Handle either filtering or listing all jobs
@@ -28,6 +31,11 @@ export default async function JobList({
             ? parseInt(searchParams.maxSalary)
             : undefined,
           location: searchParams.location || undefined,
+          company: searchParams.company || undefined,
+          skills: searchParams.skills
+            ? searchParams.skills.split(",").map(s => s.trim()).filter(Boolean)
+            : undefined,
+          jobType: searchParams.jobType || undefined,
           status: JobStatus.OPEN,
         })
       : await listJobs(20, JobStatus.OPEN);

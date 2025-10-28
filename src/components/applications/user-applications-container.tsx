@@ -84,6 +84,9 @@ export default function UserApplicationsContainer() {
   const rejectedApplications = applications.filter(
     (app) => app.status === ApplicationStatus.REJECTED
   ).length;
+  const cancelledApplications = applications.filter(
+    (app) => app.status === ApplicationStatus.CANCELLED
+  ).length;
 
   // Show loading state
   if (isLoading || isLoadingApplications) {
@@ -136,7 +139,23 @@ export default function UserApplicationsContainer() {
         <TabsTrigger value="rejected">
           Rejected ({rejectedApplications})
         </TabsTrigger>
+        <TabsTrigger value="cancelled">
+          Cancelled ({cancelledApplications})
+        </TabsTrigger>
       </TabsList>
+      <TabsContent value="cancelled">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {applications
+            .filter((app) => app.status === ApplicationStatus.CANCELLED)
+            .map((application) => (
+              <ApplicationCard
+                key={application.id}
+                application={application}
+                job={jobDetails[application.job_id]}
+              />
+            ))}
+        </div>
+      </TabsContent>
 
       <TabsContent value="all">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

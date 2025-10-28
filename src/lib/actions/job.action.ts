@@ -31,6 +31,7 @@ export interface JobFilterParams {
     maxSalary?: number;
     skills?: string[];
     jobType?: string;
+    company?: string;
     limit?: number;
     status?: JobStatus;
 }
@@ -349,6 +350,7 @@ export async function filterJobs(filterParams: JobFilterParams): Promise<JobsRes
             skills,
             jobType,
             location,
+            company,
             limit = 20,
             status = JobStatus.OPEN
         } = filterParams;
@@ -370,7 +372,7 @@ export async function filterJobs(filterParams: JobFilterParams): Promise<JobsRes
         // Get all the results that match our filters so far
         const querySnapshot = await query.get();
 
-        // Apply salary and location filter client-side (Firestore doesn't support range queries on multiple fields)
+        // Apply salary, location, and company filter client-side (Firestore doesn't support range queries on multiple fields)
         let filteredJobs = (querySnapshot.docs.map(doc => {
             const rawData = doc.data();
             return {
@@ -393,6 +395,14 @@ export async function filterJobs(filterParams: JobFilterParams): Promise<JobsRes
             filteredJobs = filteredJobs.filter(job => {
                 if (!job.company_location) return false;
                 return job.company_location.toLowerCase().includes(location.trim().toLowerCase());
+            });
+        }
+
+        // Filter by company if provided
+        if (company && company.trim() !== "") {
+            filteredJobs = filteredJobs.filter(job => {
+                if (!job.company_name) return false;
+                return job.company_name.toLowerCase().includes(company.trim().toLowerCase());
             });
         }
 

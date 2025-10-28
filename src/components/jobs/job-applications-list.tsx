@@ -138,6 +138,8 @@ export default function JobApplicationsList({
         return "bg-green-100 text-green-800";
       case ApplicationStatus.REJECTED:
         return "bg-red-100 text-red-800";
+      case ApplicationStatus.CANCELLED:
+        return "bg-red-600 text-white";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -381,6 +383,20 @@ export default function JobApplicationsList({
                           className="text-red-600"
                         >
                           Reject
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          disabled={
+                            application.status === ApplicationStatus.CANCELLED
+                          }
+                          onClick={() =>
+                            confirmStatusChange(
+                              application,
+                              ApplicationStatus.CANCELLED
+                            )
+                          }
+                          className="text-gray-600"
+                        >
+                          Cancel
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
