@@ -1,11 +1,7 @@
-import Link from "next/link";
-import type { Metadata } from "next";
-import SignupForm from "@/components/auth/signup-form";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Sign Up | RabbitJob",
-  description: "Create a new RabbitJob account",
-};
+import Link from "next/link";
+import SignupFormWithFacial from "@/components/auth/signup-form-with-facial";
 
 export default function SignupPage() {
   return (
@@ -19,7 +15,7 @@ export default function SignupPage() {
           Enter your information to create a new account
         </p>
 
-        <SignupForm />
+        <SignupFormWithFacial />
 
         <div className="mt-4 text-center">
           <p className="text-sm">

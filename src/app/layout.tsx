@@ -8,6 +8,7 @@ import { Toaster } from "sonner";
 import { AuthProvider } from "@/lib/contexts/auth-context";
 import ChatWidget from "@/components/chat/chat-widget";
 import Footer from "@/components/footer";
+import FacialProtectionWrapper from "@/components/auth/facial-protection-wrapper";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,12 +26,14 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <AuthProvider>
-          <Header />
-          <main className="min-h-screen pt-16">{children}</main>
-          <Footer />
+          <FacialProtectionWrapper>
+            <Header />
+            <main className="min-h-screen pt-16">{children}</main>
+            <Footer />
 
-          <ChatWidget />
-          <Toaster />
+            <ChatWidget />
+            <Toaster />
+          </FacialProtectionWrapper>
         </AuthProvider>
       </body>
     </html>
