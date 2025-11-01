@@ -5,7 +5,7 @@ Converted from Flask server to Firebase Cloud Functions
 
 from firebase_functions import https_fn, options
 from firebase_functions.options import set_global_options
-from firebase_admin import initialize_app, storage
+from firebase_admin import initialize_app
 import json
 import base64
 import numpy as np
@@ -140,11 +140,34 @@ def initialize_deepface():
     try:
         print("Initializing DeepFace...")
 
-        # Set DeepFace home directory to models folder
-        models_dir = os.path.join(os.path.dirname(__file__), 'models')
-        os.makedirs(models_dir, exist_ok=True)
-        os.environ['DEEPFACE_HOME'] = models_dir
-        print(f"DeepFace models directory set to: {models_dir}")
+        # Set DeepFace home directory structure
+        # DeepFace expects models to be in DEEPFACE_HOME/.deepface/weights/
+        base_dir = os.path.dirname(__file__)
+        deepface_home = base_dir
+        weights_dir = os.path.join(base_dir, '.deepface', 'weights')
+        models_source_dir = os.path.join(base_dir, 'models')
+        
+        # Create the expected directory structure
+        os.makedirs(weights_dir, exist_ok=True)
+        
+        # Set DeepFace home directory
+        os.environ['DEEPFACE_HOME'] = deepface_home
+        print(f"DeepFace home directory set to: {deepface_home}")
+        print(f"DeepFace weights directory: {weights_dir}")
+        
+        # Copy models from our models directory to the expected weights directory
+        # if they don't already exist there
+        if os.path.exists(models_source_dir):
+            for model_file in os.listdir(models_source_dir):
+                source_path = os.path.join(models_source_dir, model_file)
+                target_path = os.path.join(weights_dir, model_file)
+                
+                if os.path.isfile(source_path) and not os.path.exists(target_path):
+                    import shutil
+                    shutil.copy2(source_path, target_path)
+                    print(f"Copied model: {model_file}")
+        
+        print(f"Model files available in weights directory: {os.listdir(weights_dir) if os.path.exists(weights_dir) else 'Directory not found'}")
 
         # Import DeepFace only when needed
         from deepface import DeepFace
@@ -536,8 +559,10 @@ def health_check(req: https_fn.Request) -> https_fn.Response:
             model_loaded = False
             model_info = f"DeepFace module import error: {str(e)}"
 
-        # Get models directory path
-        models_dir = os.path.join(os.path.dirname(__file__), 'models')
+        # Get models directory paths
+        base_dir = os.path.dirname(__file__)
+        models_source_dir = os.path.join(base_dir, 'models')
+        weights_dir = os.path.join(base_dir, '.deepface', 'weights')
         
         response_data = {
             'status': 'healthy',
@@ -545,8 +570,11 @@ def health_check(req: https_fn.Request) -> https_fn.Response:
             'model': 'FaceNet512',
             'model_loaded': model_loaded,
             'model_info': model_info,
-            'models_directory': models_dir,
-            'models_directory_exists': os.path.exists(models_dir),
+            'models_source_directory': models_source_dir,
+            'models_source_exists': os.path.exists(models_source_dir),
+            'weights_directory': weights_dir,
+            'weights_directory_exists': os.path.exists(weights_dir),
+            'deepface_home': os.environ.get('DEEPFACE_HOME', base_dir),
             'images_storage_path': get_storage_path_for_images(),
             'firebase_storage_bucket': get_storage_bucket_name(),
             'detection_backends': ['retinaface', 'mtcnn', 'opencv', 'ssd'],
@@ -574,22 +602,27 @@ def models_info(req: https_fn.Request) -> https_fn.Response:
     try:
         # CORS preflight is handled automatically by the decorator
         
-        # Get models directory path
-        models_dir = os.path.join(os.path.dirname(__file__), 'models')
+        # Get models directory paths
+        base_dir = os.path.dirname(__file__)
+        models_source_dir = os.path.join(base_dir, 'models')
+        weights_dir = os.path.join(base_dir, '.deepface', 'weights')
         
         response_data = {
             'success': True,
             'service': 'deepface-firebase-functions',
             'model': 'FaceNet512',
-            'models_directory': models_dir,
+            'models_source_directory': models_source_dir,
+            'weights_directory': weights_dir,
             'firebase_storage': {
                 'bucket': get_storage_bucket_name(),
                 'images_path': get_storage_path_for_images(),
                 'temp_image_processing': True
             },
             'environment_info': {
-                'deepface_home': os.environ.get('DEEPFACE_HOME', models_dir),
-                'storage_bucket': get_storage_bucket_name()
+                'deepface_home': os.environ.get('DEEPFACE_HOME', base_dir),
+                'storage_bucket': get_storage_bucket_name(),
+                'models_source_exists': os.path.exists(models_source_dir),
+                'weights_exists': os.path.exists(weights_dir)
             },
             'detection_backends': ['retinaface', 'mtcnn', 'opencv', 'ssd'],
             'verification_threshold': 0.6
