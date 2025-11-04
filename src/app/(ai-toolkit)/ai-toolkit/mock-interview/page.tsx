@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
+import { useSubscription } from "@/hooks/useSubscription";
+import FeatureLocked from "@/components/subscription/feature-locked";
 import {
   Card,
   CardContent,
@@ -249,6 +251,8 @@ export default function MockInterviewPage() {
     }
   };
 
+  const { isPremium, isLoading } = useSubscription();
+  
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
       {/* Header with decorative elements */}
@@ -263,12 +267,19 @@ export default function MockInterviewPage() {
           AI <span className="text-blue-600">Mock Interview</span>
         </h1>
         <p className="text-slate-600 max-w-2xl mx-auto md:mx-0">
-          Practice your interview skills with our AI interviewer and receive
-          personalized feedback
+          Practice your interview skills with our AI interviewer and receive personalized feedback
         </p>
       </div>
 
-      {step === "setup" && (
+      {isLoading ? (
+        <div className="flex justify-center">
+          <Loader2 className="h-6 w-6 animate-spin" />
+        </div>
+      ) : !isPremium ? (
+        <FeatureLocked />
+      ) : (
+        <>
+          {step === "setup" && (
         <Card className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100 relative">
           <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-full -mr-8 -mt-8 z-0"></div>
           <CardHeader className="relative z-10">
@@ -592,6 +603,8 @@ export default function MockInterviewPage() {
             </Button>
           </CardFooter>
         </Card>
+      )}
+        </>
       )}
     </div>
   );
