@@ -1,22 +1,16 @@
-import Link from "next/link";
-import type { Metadata } from "next";
-import LoginForm from "@/components/auth/login-form";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Login | RabbitJob",
-  description: "Login to your RabbitJob account",
-};
+import Link from "next/link";
+import LoginFormWithFacial from "@/components/auth/login-form-with-facial";
 
 export default function LoginPage() {
   return (
     <div className="min-h-screen bg-blue-50 flex flex-col items-center justify-center p-4">
-      {/* Header with logo */}
-
       {/* Main login card */}
       <div className="w-full max-w-md bg-white rounded-lg shadow-md p-8 border border-blue-100">
         <h1 className="text-2xl font-semibold mb-6 text-blue-800">Sign in</h1>
 
-        <LoginForm />
+        <LoginFormWithFacial />
 
         <div className="mt-4 text-center">
           <p className="text-sm">
