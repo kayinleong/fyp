@@ -5,6 +5,7 @@ import { validateSession } from "@/lib/actions/auth.action";
 import { checkPremiumAccess } from "@/lib/actions/subscription.action";
 import { NextResponse } from "next/server";
 
+// For API routes
 export async function withSubscription(handler: any) {
   return async (...args: any[]) => {
     try {

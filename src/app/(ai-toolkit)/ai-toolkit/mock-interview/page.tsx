@@ -34,9 +34,6 @@ import {
 import {
   generateInterviewQuestions,
   evaluateInterviewResponses,
-  type InterviewFeedback,
-  type InterviewQuestion,
-  type InterviewSetup,
 } from "@/lib/actions/mock-interview.action";
 import { toast } from "sonner";
 import { useSpeech } from "@/hooks/useSpeech";
@@ -61,6 +58,11 @@ import {
   generateMockInterviewPdf,
   MockInterviewPdfData,
 } from "@/lib/utils/pdf-generator";
+import {
+  type InterviewFeedback,
+  type InterviewQuestion,
+  type InterviewSetup,
+} from "@/lib/domains/mock-interview.domain";
 
 export default function MockInterviewPage() {
   const [step, setStep] = useState<"setup" | "interview" | "feedback">("setup");
@@ -252,7 +254,7 @@ export default function MockInterviewPage() {
   };
 
   const { isPremium, isLoading } = useSubscription();
-  
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
       {/* Header with decorative elements */}
@@ -267,7 +269,8 @@ export default function MockInterviewPage() {
           AI <span className="text-blue-600">Mock Interview</span>
         </h1>
         <p className="text-slate-600 max-w-2xl mx-auto md:mx-0">
-          Practice your interview skills with our AI interviewer and receive personalized feedback
+          Practice your interview skills with our AI interviewer and receive
+          personalized feedback
         </p>
       </div>
 
@@ -280,330 +283,338 @@ export default function MockInterviewPage() {
       ) : (
         <>
           {step === "setup" && (
-        <Card className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100 relative">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-full -mr-8 -mt-8 z-0"></div>
-          <CardHeader className="relative z-10">
-            <CardTitle className="text-xl font-bold text-slate-800">
-              Interview Setup
-            </CardTitle>
-          </CardHeader>
-          <Form {...setupForm}>
-            <form onSubmit={setupForm.handleSubmit(startInterview)}>
-              <CardContent className="space-y-4 relative z-10">
-                <FormField
-                  control={setupForm.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-slate-700">
-                        Your Name
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="John Doe"
-                          {...field}
-                          className="rounded-lg"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            <Card className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100 relative">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-full -mr-8 -mt-8 z-0"></div>
+              <CardHeader className="relative z-10">
+                <CardTitle className="text-xl font-bold text-slate-800">
+                  Interview Setup
+                </CardTitle>
+              </CardHeader>
+              <Form {...setupForm}>
+                <form onSubmit={setupForm.handleSubmit(startInterview)}>
+                  <CardContent className="space-y-4 relative z-10">
+                    <FormField
+                      control={setupForm.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-slate-700">
+                            Your Name
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="John Doe"
+                              {...field}
+                              className="rounded-lg"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                <FormField
-                  control={setupForm.control}
-                  name="position"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-slate-700">
-                        Job Position
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Frontend Developer"
-                          {...field}
-                          className="rounded-lg"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    <FormField
+                      control={setupForm.control}
+                      name="position"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-slate-700">
+                            Job Position
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Frontend Developer"
+                              {...field}
+                              className="rounded-lg"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                <FormField
-                  control={setupForm.control}
-                  name="experience"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-slate-700">
-                        Years of Experience
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="rounded-lg">
-                            <SelectValue placeholder="Select experience level" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="0-1">0-1 years</SelectItem>
-                          <SelectItem value="1-3">1-3 years</SelectItem>
-                          <SelectItem value="3-5">3-5 years</SelectItem>
-                          <SelectItem value="5-10">5-10 years</SelectItem>
-                          <SelectItem value="10+">10+ years</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    <FormField
+                      control={setupForm.control}
+                      name="experience"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-slate-700">
+                            Years of Experience
+                          </FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="rounded-lg">
+                                <SelectValue placeholder="Select experience level" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="0-1">0-1 years</SelectItem>
+                              <SelectItem value="1-3">1-3 years</SelectItem>
+                              <SelectItem value="3-5">3-5 years</SelectItem>
+                              <SelectItem value="5-10">5-10 years</SelectItem>
+                              <SelectItem value="10+">10+ years</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                <div className="bg-blue-50 rounded-xl p-6 mt-6">
-                  <p className="text-slate-700">
-                    Our AI interviewer will ask you relevant questions based on
-                    your desired job position and experience level. Speak your
-                    answers and get real-time feedback to improve your interview
-                    skills.
+                    <div className="bg-blue-50 rounded-xl p-6 mt-6">
+                      <p className="text-slate-700">
+                        Our AI interviewer will ask you relevant questions based
+                        on your desired job position and experience level. Speak
+                        your answers and get real-time feedback to improve your
+                        interview skills.
+                      </p>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="relative z-10">
+                    <Button
+                      type="submit"
+                      disabled={
+                        !setupForm.formState.isValid ||
+                        isProcessing ||
+                        setupForm.formState.isSubmitting
+                      }
+                      className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl py-6"
+                    >
+                      {isProcessing ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Preparing Interview...
+                        </>
+                      ) : (
+                        <>
+                          Start Interview{" "}
+                          <ArrowRight className="h-4 w-4 ml-2" />
+                        </>
+                      )}
+                    </Button>
+                  </CardFooter>
+                </form>
+              </Form>
+            </Card>
+          )}
+
+          {step === "interview" && questions.length > 0 && (
+            <Card className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100 relative">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-full -mr-8 -mt-8 z-0"></div>
+              <CardHeader className="flex flex-row justify-between items-center relative z-10">
+                <CardTitle className="text-xl font-bold text-slate-800">
+                  Question {currentQuestion + 1} of {questions.length}
+                </CardTitle>
+                {isSupported && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={readQuestion}
+                    disabled={isSpeaking}
+                    title="Read question aloud"
+                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                  >
+                    <Volume2 className="h-5 w-5" />
+                  </Button>
+                )}
+              </CardHeader>
+              <CardContent className="space-y-6 relative z-10">
+                <div className="bg-blue-50 p-6 rounded-xl relative">
+                  <div className="flex items-start justify-between">
+                    <p className="font-medium pr-10 text-slate-800">
+                      {questions[currentQuestion].question}
+                    </p>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="flex-shrink-0 text-blue-600 hover:bg-blue-100"
+                          >
+                            <HelpCircle className="h-5 w-5" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <p>{questions[currentQuestion].hint}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 p-6 rounded-xl">
+                  <div className="flex items-start justify-between mb-2">
+                    <Label className="text-slate-700 font-semibold">
+                      Hint:
+                    </Label>
+                  </div>
+                  <p className="text-sm text-slate-600 italic">
+                    {questions[currentQuestion].hint}
                   </p>
+                </div>
+
+                <div className="border rounded-xl p-6 min-h-[150px] relative">
+                  {isRecording ? (
+                    <>
+                      <div className="absolute top-2 right-2 flex items-center">
+                        <div className="h-3 w-3 bg-red-500 rounded-full mr-2 animate-pulse"></div>
+                        <span className="text-sm text-slate-500">
+                          Recording...
+                        </span>
+                      </div>
+                      <p className="text-slate-800">
+                        {transcript || "Speak now..."}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-slate-500">
+                      {transcript
+                        ? transcript
+                        : "Press the microphone button to start recording your answer..."}
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+              <CardFooter className="relative z-10">
+                {isProcessing ? (
+                  <Button
+                    disabled
+                    className="w-full bg-gray-300 rounded-xl py-6"
+                  >
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Analyzing Responses...
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={toggleRecording}
+                    className={`w-full rounded-xl py-6 ${
+                      isRecording
+                        ? "bg-red-500 hover:bg-red-600"
+                        : "bg-blue-600 hover:bg-blue-700"
+                    }`}
+                    disabled={!hasRecognitionSupport && !isRecording}
+                  >
+                    {isListening ? (
+                      <>
+                        <MicOff className="h-4 w-4 mr-2" />
+                        Stop Recording
+                      </>
+                    ) : (
+                      <>
+                        <Mic className="h-4 w-4 mr-2" />
+                        Start Recording
+                      </>
+                    )}
+                  </Button>
+                )}
+              </CardFooter>
+            </Card>
+          )}
+
+          {step === "feedback" && feedback && (
+            <Card className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100 relative">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-full -mr-8 -mt-8 z-0"></div>
+              <CardHeader className="flex flex-row justify-between items-center relative z-10">
+                <div className="flex flex-col">
+                  <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-600 text-sm font-medium mb-2 self-start">
+                    RESULTS
+                    <Sparkles className="h-4 w-4 ml-2 text-blue-500" />
+                  </div>
+                  <CardTitle className="text-xl font-bold text-slate-800">
+                    Interview Feedback
+                  </CardTitle>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={exportToPdf}
+                  disabled={isExportingPdf || !user}
+                  className="border-blue-200 text-blue-600 hover:bg-blue-50"
+                >
+                  {isExportingPdf ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4 mr-2" />
+                  )}
+                  Export to PDF
+                </Button>
+              </CardHeader>
+              <CardContent className="space-y-6 relative z-10">
+                <div className="flex justify-center mb-4">
+                  <div className="h-32 w-32 rounded-full bg-blue-100 flex items-center justify-center">
+                    <span className="text-3xl font-bold text-blue-600">
+                      {feedback.overallScore}/10
+                    </span>
+                  </div>
+                </div>
+
+                <div className="bg-blue-50 rounded-xl p-6 mb-6">
+                  <h3 className="text-lg font-semibold mb-2 text-slate-800">
+                    Strengths
+                  </h3>
+                  <ul className="list-disc pl-5 space-y-1">
+                    {feedback.strengths.map((strength, index) => (
+                      <li key={index} className="text-slate-700">
+                        {strength}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="bg-gray-50 rounded-xl p-6 mb-6">
+                  <h3 className="text-lg font-semibold mb-2 text-slate-800">
+                    Areas for Improvement
+                  </h3>
+                  <ul className="list-disc pl-5 space-y-1">
+                    {feedback.improvements.map((improvement, index) => (
+                      <li key={index} className="text-slate-700">
+                        {improvement}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 text-slate-800">
+                    Detailed Response Analysis
+                  </h3>
+                  {feedback.detailedFeedback.map((item, index) => (
+                    <div
+                      key={index}
+                      className="mb-4 border border-gray-100 rounded-xl p-6 shadow-sm"
+                    >
+                      <p className="font-medium mb-3 text-slate-800">
+                        Q: {item.question}
+                      </p>
+                      <div className="bg-gray-50 p-4 rounded-lg mb-3">
+                        <p className="text-sm text-blue-600 font-medium mb-1">
+                          Your Response:
+                        </p>
+                        <p className="text-sm text-slate-700">
+                          {userResponses[index] || "No response recorded"}
+                        </p>
+                      </div>
+                      <p className="text-sm text-blue-600 font-medium mb-1">
+                        Feedback:
+                      </p>
+                      <p className="text-sm text-slate-700">{item.feedback}</p>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
               <CardFooter className="relative z-10">
                 <Button
-                  type="submit"
-                  disabled={
-                    !setupForm.formState.isValid ||
-                    isProcessing ||
-                    setupForm.formState.isSubmitting
-                  }
+                  onClick={restartInterview}
                   className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl py-6"
                 >
-                  {isProcessing ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Preparing Interview...
-                    </>
-                  ) : (
-                    <>
-                      Start Interview <ArrowRight className="h-4 w-4 ml-2" />
-                    </>
-                  )}
+                  Start New Interview <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               </CardFooter>
-            </form>
-          </Form>
-        </Card>
-      )}
-
-      {step === "interview" && questions.length > 0 && (
-        <Card className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100 relative">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-full -mr-8 -mt-8 z-0"></div>
-          <CardHeader className="flex flex-row justify-between items-center relative z-10">
-            <CardTitle className="text-xl font-bold text-slate-800">
-              Question {currentQuestion + 1} of {questions.length}
-            </CardTitle>
-            {isSupported && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={readQuestion}
-                disabled={isSpeaking}
-                title="Read question aloud"
-                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-              >
-                <Volume2 className="h-5 w-5" />
-              </Button>
-            )}
-          </CardHeader>
-          <CardContent className="space-y-6 relative z-10">
-            <div className="bg-blue-50 p-6 rounded-xl relative">
-              <div className="flex items-start justify-between">
-                <p className="font-medium pr-10 text-slate-800">
-                  {questions[currentQuestion].question}
-                </p>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="flex-shrink-0 text-blue-600 hover:bg-blue-100"
-                      >
-                        <HelpCircle className="h-5 w-5" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-xs">
-                      <p>{questions[currentQuestion].hint}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            </div>
-
-            <div className="bg-gray-50 p-6 rounded-xl">
-              <div className="flex items-start justify-between mb-2">
-                <Label className="text-slate-700 font-semibold">Hint:</Label>
-              </div>
-              <p className="text-sm text-slate-600 italic">
-                {questions[currentQuestion].hint}
-              </p>
-            </div>
-
-            <div className="border rounded-xl p-6 min-h-[150px] relative">
-              {isRecording ? (
-                <>
-                  <div className="absolute top-2 right-2 flex items-center">
-                    <div className="h-3 w-3 bg-red-500 rounded-full mr-2 animate-pulse"></div>
-                    <span className="text-sm text-slate-500">Recording...</span>
-                  </div>
-                  <p className="text-slate-800">
-                    {transcript || "Speak now..."}
-                  </p>
-                </>
-              ) : (
-                <p className="text-slate-500">
-                  {transcript
-                    ? transcript
-                    : "Press the microphone button to start recording your answer..."}
-                </p>
-              )}
-            </div>
-          </CardContent>
-          <CardFooter className="relative z-10">
-            {isProcessing ? (
-              <Button disabled className="w-full bg-gray-300 rounded-xl py-6">
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Analyzing Responses...
-              </Button>
-            ) : (
-              <Button
-                onClick={toggleRecording}
-                className={`w-full rounded-xl py-6 ${
-                  isRecording
-                    ? "bg-red-500 hover:bg-red-600"
-                    : "bg-blue-600 hover:bg-blue-700"
-                }`}
-                disabled={!hasRecognitionSupport && !isRecording}
-              >
-                {isListening ? (
-                  <>
-                    <MicOff className="h-4 w-4 mr-2" />
-                    Stop Recording
-                  </>
-                ) : (
-                  <>
-                    <Mic className="h-4 w-4 mr-2" />
-                    Start Recording
-                  </>
-                )}
-              </Button>
-            )}
-          </CardFooter>
-        </Card>
-      )}
-
-      {step === "feedback" && feedback && (
-        <Card className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100 relative">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-full -mr-8 -mt-8 z-0"></div>
-          <CardHeader className="flex flex-row justify-between items-center relative z-10">
-            <div className="flex flex-col">
-              <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-600 text-sm font-medium mb-2 self-start">
-                RESULTS
-                <Sparkles className="h-4 w-4 ml-2 text-blue-500" />
-              </div>
-              <CardTitle className="text-xl font-bold text-slate-800">
-                Interview Feedback
-              </CardTitle>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={exportToPdf}
-              disabled={isExportingPdf || !user}
-              className="border-blue-200 text-blue-600 hover:bg-blue-50"
-            >
-              {isExportingPdf ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Download className="h-4 w-4 mr-2" />
-              )}
-              Export to PDF
-            </Button>
-          </CardHeader>
-          <CardContent className="space-y-6 relative z-10">
-            <div className="flex justify-center mb-4">
-              <div className="h-32 w-32 rounded-full bg-blue-100 flex items-center justify-center">
-                <span className="text-3xl font-bold text-blue-600">
-                  {feedback.overallScore}/10
-                </span>
-              </div>
-            </div>
-
-            <div className="bg-blue-50 rounded-xl p-6 mb-6">
-              <h3 className="text-lg font-semibold mb-2 text-slate-800">
-                Strengths
-              </h3>
-              <ul className="list-disc pl-5 space-y-1">
-                {feedback.strengths.map((strength, index) => (
-                  <li key={index} className="text-slate-700">
-                    {strength}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="bg-gray-50 rounded-xl p-6 mb-6">
-              <h3 className="text-lg font-semibold mb-2 text-slate-800">
-                Areas for Improvement
-              </h3>
-              <ul className="list-disc pl-5 space-y-1">
-                {feedback.improvements.map((improvement, index) => (
-                  <li key={index} className="text-slate-700">
-                    {improvement}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-4 text-slate-800">
-                Detailed Response Analysis
-              </h3>
-              {feedback.detailedFeedback.map((item, index) => (
-                <div
-                  key={index}
-                  className="mb-4 border border-gray-100 rounded-xl p-6 shadow-sm"
-                >
-                  <p className="font-medium mb-3 text-slate-800">
-                    Q: {item.question}
-                  </p>
-                  <div className="bg-gray-50 p-4 rounded-lg mb-3">
-                    <p className="text-sm text-blue-600 font-medium mb-1">
-                      Your Response:
-                    </p>
-                    <p className="text-sm text-slate-700">
-                      {userResponses[index] || "No response recorded"}
-                    </p>
-                  </div>
-                  <p className="text-sm text-blue-600 font-medium mb-1">
-                    Feedback:
-                  </p>
-                  <p className="text-sm text-slate-700">{item.feedback}</p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-          <CardFooter className="relative z-10">
-            <Button
-              onClick={restartInterview}
-              className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl py-6"
-            >
-              Start New Interview <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-          </CardFooter>
-        </Card>
-      )}
+            </Card>
+          )}
         </>
       )}
     </div>
