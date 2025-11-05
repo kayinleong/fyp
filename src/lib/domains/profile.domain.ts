@@ -7,6 +7,8 @@ export interface Profile {
     gender: number;
     university: string;
     role?: "GUEST" | "COMPANY"; // Hidden field for user role
+    subscription_plan?: "FREE" | "PREMIUM"; // User's current subscription level
+    subscription_id?: string; // ID of the user's active subscription
     created_at?: string; // ISO string format for client use
     updated_at?: string; // ISO string format for client use
 }

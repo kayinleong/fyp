@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { validateSession } from "@/lib/actions/auth.action";
-import ProfileForm from "@/components/profile/profile-form";
+
+import ProfileOverview from "@/components/profile/profile-overview";
 
 export const metadata: Metadata = {
   title: "Profile | RabbitJob",
@@ -19,7 +20,7 @@ export default async function ProfilePage() {
 
   return (
     <div className="mx-auto container max-w-4xl py-10 p-4">
-      <div className="flex flex-col space-y-6">
+      <div className="flex flex-col space-y-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Profile</h1>
           <p className="text-muted-foreground">
@@ -27,7 +28,7 @@ export default async function ProfilePage() {
           </p>
         </div>
 
-        <ProfileForm userId={user.uid} />
+        <ProfileOverview userId={user.uid} />
       </div>
     </div>
   );

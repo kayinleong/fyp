@@ -1,40 +1,18 @@
 "use server"
 
-import { z } from "zod";
 import { ai } from "../firebase/ai";
+import { withSubscription } from "../middleware/subscription.middleware";
+import { 
+    InterviewSetup,
+    InterviewResponses,
+    InterviewQuestion,
+    InterviewFeedback,
+    interviewSetupSchema,
+    interviewResponsesSchema
+} from "../domains/mock-interview.domain";
 
-// Define schema for interview setup
-const interviewSetupSchema = z.object({
-    name: z.string().min(1),
-    position: z.string().min(1),
-    experience: z.string().min(1),
-});
-
-// Define schema for interview responses
-const interviewResponsesSchema = z.object({
-    name: z.string().min(1),
-    position: z.string().min(1),
-    experience: z.string().min(1),
-    questions: z.array(z.string()),
-    responses: z.array(z.string()),
-});
-
-// Update type definitions to include hints
-export type InterviewSetup = z.infer<typeof interviewSetupSchema>;
-export type InterviewResponses = z.infer<typeof interviewResponsesSchema>;
-export type InterviewQuestion = {
-    question: string;
-    hint: string;
-};
-export type InterviewFeedback = {
-    strengths: string[];
-    improvements: string[];
-    overallScore: number;
-    detailedFeedback: { question: string; feedback: string }[];
-};
-
-// AI flow to generate interview questions
-export async function generateInterviewQuestions(setup: InterviewSetup): Promise<InterviewQuestion[]> {
+// Base interview question generation function
+const generateInterviewQuestionsBase = async (setup: InterviewSetup): Promise<InterviewQuestion[]> => {
     try {
         const { name, position, experience } = interviewSetupSchema.parse(setup);
 
@@ -90,8 +68,8 @@ export async function generateInterviewQuestions(setup: InterviewSetup): Promise
     }
 }
 
-// AI flow to evaluate interview responses
-export async function evaluateInterviewResponses(data: InterviewResponses): Promise<InterviewFeedback> {
+// Base interview response evaluation function
+const evaluateInterviewResponsesBase = async (data: InterviewResponses): Promise<InterviewFeedback> => {
     try {
         const { name, position, experience, questions, responses } = interviewResponsesSchema.parse(data);
 
@@ -158,5 +136,8 @@ export async function evaluateInterviewResponses(data: InterviewResponses): Prom
         console.error("Error evaluating interview responses:", error);
         throw new Error("Failed to evaluate interview responses");
     }
-}
+};
 
+// Export the protected versions of the functions
+export const generateInterviewQuestions = withSubscription(generateInterviewQuestionsBase);
+export const evaluateInterviewResponses = withSubscription(evaluateInterviewResponsesBase);

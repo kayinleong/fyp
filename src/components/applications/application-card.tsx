@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { updateApplicationStatus } from "@/lib/actions/application.action";
+import { toast } from "sonner";
 import {
   Application,
   ApplicationStatus,
@@ -36,6 +38,24 @@ export default function ApplicationCard({
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
 
   // Function to get status color
+  const [isCancelling, setIsCancelling] = useState(false);
+  const handleCancel = async () => {
+    setIsCancelling(true);
+    try {
+      const response = await updateApplicationStatus(application.id, ApplicationStatus.CANCELLED);
+      if (response.success) {
+        toast("Application cancelled");
+        window.location.reload(); // Refresh to show updated status
+      } else {
+        toast(response.error || "Failed to cancel application");
+      }
+    } catch (error) {
+      toast("Something went wrong while cancelling");
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
   const getStatusColor = (status: ApplicationStatus) => {
     switch (status) {
       case ApplicationStatus.PENDING:
@@ -46,6 +66,8 @@ export default function ApplicationCard({
         return "bg-green-100 text-green-800";
       case ApplicationStatus.REJECTED:
         return "bg-red-100 text-red-800";
+      case ApplicationStatus.CANCELLED:
+        return "bg-red-600 text-white";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -116,12 +138,24 @@ export default function ApplicationCard({
             Details
           </Button>
 
-          <Button variant="outline" size="sm" asChild>
-            <Link href={application.resume_path} target="_blank">
-              <FileText className="h-3 w-3 mr-1" />
-              Resume
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link href={application.resume_path} target="_blank">
+                <FileText className="h-3 w-3 mr-1" />
+                Resume
+              </Link>
+            </Button>
+            {application.status !== ApplicationStatus.CANCELLED && (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleCancel}
+                disabled={isCancelling}
+              >
+                {isCancelling ? "Cancelling..." : "Cancel"}
+              </Button>
+            )}
+          </div>
         </CardFooter>
       </Card>
 

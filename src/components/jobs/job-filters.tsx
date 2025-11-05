@@ -19,6 +19,10 @@ export default function JobFilters() {
     parseInt(searchParams.get("minSalary") || "0"),
     parseInt(searchParams.get("maxSalary") || "200000"),
   ]);
+  const [location, setLocation] = useState(searchParams.get("location") || "");
+  const [company, setCompany] = useState(searchParams.get("company") || "");
+  const [skills, setSkills] = useState(searchParams.get("skills") || "");
+  const [jobType, setJobType] = useState(searchParams.get("jobType") || "");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleFilter = async () => {
@@ -30,6 +34,11 @@ export default function JobFilters() {
       if (isRemote) params.set("remote", "true");
       params.set("minSalary", salaryRange[0].toString());
       params.set("maxSalary", salaryRange[1].toString());
+      if (location.trim() !== "") params.set("location", location.trim());
+      if (company.trim() !== "") params.set("company", company.trim());
+
+  if (skills.trim() !== "") params.set("skills", skills.trim());
+  if (jobType.trim() !== "") params.set("jobType", jobType.trim());
 
       // Update URL to reflect filters
       router.push(`/jobs?${params.toString()}`);
@@ -42,10 +51,11 @@ export default function JobFilters() {
     }
   };
 
+
+
   return (
     <div className="space-y-6 p-4 border rounded-lg">
       <h2 className="text-xl font-semibold">Filters</h2>
-
       <div className="space-y-4">
         <div className="flex items-center space-x-2">
           <Checkbox
@@ -54,6 +64,56 @@ export default function JobFilters() {
             onCheckedChange={(checked) => setIsRemote(checked as boolean)}
           />
           <Label htmlFor="remote">Remote only</Label>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Location</Label>
+          <input
+            type="text"
+            className="w-full border rounded px-3 py-2"
+            placeholder="Enter location (e.g. Kuala Lumpur)"
+            value={location}
+            onChange={e => setLocation(e.target.value)}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Company</Label>
+          <input
+            type="text"
+            className="w-full border rounded px-3 py-2"
+            placeholder="Enter company name"
+            value={company}
+            onChange={e => setCompany(e.target.value)}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Skills</Label>
+          <input
+            type="text"
+            className="w-full border rounded px-3 py-2"
+            placeholder="Enter skills (comma separated)"
+            value={skills}
+            onChange={e => setSkills(e.target.value)}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Job Type</Label>
+          <select
+            className="w-full border rounded px-3 py-2"
+            value={jobType}
+            onChange={e => setJobType(e.target.value)}
+          >
+            <option value="">Any</option>
+            <option value="Full-time">Full-time</option>
+            <option value="Part-time">Part-time</option>
+            <option value="Contract">Contract</option>
+            <option value="Temporary">Temporary</option>
+            <option value="Internship">Internship</option>
+            <option value="Freelance">Freelance</option>
+          </select>
         </div>
 
         <div className="space-y-2">
@@ -73,7 +133,6 @@ export default function JobFilters() {
           </div>
         </div>
       </div>
-
       <Button onClick={handleFilter} className="w-full" disabled={isLoading}>
         {isLoading ? "Applying..." : "Apply Filters"}
       </Button>
