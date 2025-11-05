@@ -42,14 +42,17 @@ export default function ApplicationCard({
   const handleCancel = async () => {
     setIsCancelling(true);
     try {
-      const response = await updateApplicationStatus(application.id, ApplicationStatus.CANCELLED);
+      const response = await updateApplicationStatus(
+        application.id,
+        ApplicationStatus.CANCELLED
+      );
       if (response.success) {
         toast("Application cancelled");
         window.location.reload(); // Refresh to show updated status
       } else {
         toast(response.error || "Failed to cancel application");
       }
-    } catch (error) {
+    } catch {
       toast("Something went wrong while cancelling");
     } finally {
       setIsCancelling(false);
