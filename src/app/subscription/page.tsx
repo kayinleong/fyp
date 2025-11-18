@@ -15,7 +15,8 @@ import {
   SubscriptionPlan,
 } from "@/lib/domains/subscription.domain";
 import { redirect } from "next/navigation";
-import UpgradeSubscriptionButton from "@/components/subscription/upgrade-subscription-button";
+import StripeCheckoutButton from "@/components/subscription/stripe-checkout-button";
+import { checkPremiumAccess } from "@/lib/actions/subscription.action";
 
 export default async function SubscriptionPage({
   searchParams,
@@ -25,6 +26,7 @@ export default async function SubscriptionPage({
   // Check if user is authenticated
   const sessionResponse = await validateSession();
   const userId = sessionResponse.user?.uid;
+  const userEmail = sessionResponse.user?.email || "";
 
   if (!userId) {
     redirect("/login?redirect=/subscription");
@@ -32,7 +34,10 @@ export default async function SubscriptionPage({
 
   // Get user's profile to check current subscription
   const { profile } = await getProfileById(userId);
-  const currentPlan = profile?.subscription_plan || "FREE";
+  const { hasPremiumAccess } = await checkPremiumAccess(userId);
+  const currentPlan = hasPremiumAccess
+    ? SubscriptionPlan.PREMIUM
+    : (profile?.subscription_plan as SubscriptionPlan) || SubscriptionPlan.FREE;
 
   const resolvedSearchParams = await searchParams;
   const showPremiumRequired = resolvedSearchParams.error === "premium-required";
@@ -100,7 +105,12 @@ export default async function SubscriptionPage({
                       Current Plan
                     </Button>
                   ) : plan.plan === SubscriptionPlan.PREMIUM ? (
-                    <UpgradeSubscriptionButton userId={userId} />
+                    <StripeCheckoutButton
+                      userId={userId}
+                      userEmail={userEmail}
+                      planType={plan.plan}
+                      planName={plan.name}
+                    />
                   ) : null}
                 </div>
               </CardContent>

@@ -3,5 +3,5 @@ export default function AIToolkitLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return <>{children}</>;
 }

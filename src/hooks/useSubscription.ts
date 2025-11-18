@@ -1,7 +1,7 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/contexts/auth-context";
-import { getProfileById } from "@/lib/actions/profile.action";
-import { SubscriptionPlan } from "@/lib/domains/subscription.domain";
 
 export function useSubscription() {
   const { user } = useAuth();
@@ -9,25 +9,55 @@ export function useSubscription() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    async function checkSubscription() {
-      if (user?.uid) {
-        try {
-          const { profile } = await getProfileById(user.uid);
-          setIsPremium(profile?.subscription_plan === SubscriptionPlan.PREMIUM);
-        } catch (error) {
-          console.error("Error checking subscription:", error);
+    let isMounted = true;
+
+    async function fetchSubscriptionStatus() {
+      if (!user?.uid) {
+        if (isMounted) {
           setIsPremium(false);
-        } finally {
           setIsLoading(false);
         }
-      } else {
-        setIsPremium(false);
-        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+
+      try {
+        const response = await fetch("/api/subscription/status", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          cache: "no-store",
+        });
+
+        if (!isMounted) return;
+
+        if (response.ok) {
+          const data = await response.json();
+          setIsPremium(Boolean(data.isPremium));
+        } else if (response.status === 401 || response.status === 403) {
+          setIsPremium(false);
+        } else {
+          console.error("Failed to fetch subscription status:", response.status);
+          setIsPremium(false);
+        }
+      } catch (error) {
+        console.error("Error fetching subscription status:", error);
+        if (isMounted) {
+          setIsPremium(false);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
-    checkSubscription();
-  }, [user]);
+    fetchSubscriptionStatus();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.uid]);
 
   return { isPremium, isLoading };
 }

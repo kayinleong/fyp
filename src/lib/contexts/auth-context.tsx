@@ -6,6 +6,7 @@ import {
   useState,
   useEffect,
   ReactNode,
+  useCallback,
 } from "react";
 import { User } from "firebase/auth";
 import { subscribeToAuthChanges } from "@/lib/firebase/client";
@@ -24,6 +25,7 @@ interface AuthContextType {
   isLoading: boolean;
   signOut: () => Promise<void>;
   setServerSession: (idToken: string) => Promise<boolean>;
+  refreshProfile: () => Promise<void>;
   refreshFacialStatus: () => Promise<void>;
   setLoginScanFace: (scanned: boolean) => void;
 }
@@ -100,6 +102,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return result.success;
   }
 
+  const refreshProfile = useCallback(async () => {
+    if (!user) {
+      setProfile(null);
+      return;
+    }
+
+    try {
+      const profileResult = await getProfileById(user.uid);
+      if (profileResult.profile) {
+        setProfile(profileResult.profile);
+      }
+    } catch (error) {
+      console.error("Error refreshing profile:", error);
+    }
+  }, [user]);
+
   async function refreshFacialStatus() {
     if (!user) return;
 
@@ -140,6 +158,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         signOut,
         setServerSession,
+        refreshProfile,
         refreshFacialStatus,
         setLoginScanFace,
       }}
