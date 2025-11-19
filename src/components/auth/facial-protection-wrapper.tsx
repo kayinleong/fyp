@@ -5,6 +5,10 @@ import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { Icons } from "@/components/icons";
 
+// Check if facial recognition is required from environment variable
+const IS_DEEPFACE_REQUIRED =
+  process.env.NEXT_PUBLIC_DEEPFACE_REQUIRED === "true";
+
 interface FacialProtectionWrapperProps {
   children: React.ReactNode;
 }
@@ -64,6 +68,9 @@ export default function FacialProtectionWrapper({
   // Block navigation and browser history manipulation for users without facial setup
   useEffect(() => {
     if (isLoading) return;
+
+    // Skip facial protection if not required
+    if (!IS_DEEPFACE_REQUIRED) return;
 
     const isUnrestricted = UNRESTRICTED_ROUTES.some((route) =>
       pathname.startsWith(route)
@@ -125,6 +132,9 @@ export default function FacialProtectionWrapper({
     // Don't do anything while loading
     if (isLoading) return;
 
+    // Skip facial protection if not required
+    if (!IS_DEEPFACE_REQUIRED) return;
+
     // Don't redirect if already redirected for this path
     if (hasRedirected.current) return;
 
@@ -172,6 +182,7 @@ export default function FacialProtectionWrapper({
   // IMMEDIATE BLOCKING for users who need facial setup (unless they just completed it)
   if (
     !isLoading &&
+    IS_DEEPFACE_REQUIRED &&
     user &&
     needsFacialSetup &&
     !isUnrestrictedRoute &&
@@ -181,40 +192,20 @@ export default function FacialProtectionWrapper({
       hasRedirected.current = true;
       router.replace("/setup-facial");
     }
-    return (
-      <div className="min-h-screen bg-red-100 flex items-center justify-center">
-        <div className="text-center bg-white p-8 rounded-lg shadow-lg border-2 border-red-300">
-          <div className="text-red-600 text-8xl mb-4">🛑</div>
-          <h1 className="text-2xl font-bold text-red-800 mb-2">
-            ACCESS DENIED
-          </h1>
-          <p className="text-red-600">Facial recognition setup required</p>
-          <p className="text-sm text-red-500 mt-2">Redirecting to setup...</p>
-        </div>
-      </div>
-    );
   }
 
   // IMMEDIATE BLOCKING for users who need login facial scan
-  if (!isLoading && user && needsLoginScan && !isUnrestrictedRoute) {
+  if (
+    !isLoading &&
+    IS_DEEPFACE_REQUIRED &&
+    user &&
+    needsLoginScan &&
+    !isUnrestrictedRoute
+  ) {
     if (!hasRedirected.current) {
       hasRedirected.current = true;
       router.replace("/login-facial");
     }
-    return (
-      <div className="min-h-screen bg-orange-100 flex items-center justify-center">
-        <div className="text-center bg-white p-8 rounded-lg shadow-lg border-2 border-orange-300">
-          <div className="text-orange-600 text-8xl mb-4">�</div>
-          <h1 className="text-2xl font-bold text-orange-800 mb-2">
-            FACIAL VERIFICATION REQUIRED
-          </h1>
-          <p className="text-orange-600">Please scan your face to continue</p>
-          <p className="text-sm text-orange-500 mt-2">
-            Redirecting to face scan...
-          </p>
-        </div>
-      </div>
-    );
   }
 
   // Show loading while checking
