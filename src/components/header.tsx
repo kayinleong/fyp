@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Briefcase, User, LogOut } from "lucide-react";
+import { Menu, Briefcase, User, LogOut, FileUser } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -197,12 +197,20 @@ export default function Header() {
                       </Link>
                     </DropdownMenuItem>
                     {profile?.role !== "COMPANY" && (
-                      <DropdownMenuItem asChild>
-                        <Link href="/applications">
-                          <Briefcase className="mr-2 h-4 w-4" />
-                          <span>My Applications</span>
-                        </Link>
-                      </DropdownMenuItem>
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link href="/resumes">
+                            <FileUser className="mr-2 h-4 w-4" />
+                            <span>My Resumes</span>
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/applications">
+                            <Briefcase className="mr-2 h-4 w-4" />
+                            <span>My Applications</span>
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
                     )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout}>

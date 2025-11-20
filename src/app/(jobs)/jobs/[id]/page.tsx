@@ -57,28 +57,28 @@ export default async function JobDetailsPage({ params }: { params: any }) {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      {/* Pink-themed header section */}
+      {/* Blue-themed header section */}
       <div className="relative mb-10">
-        <div className="absolute top-0 right-0 w-20 h-20 bg-pink-100 rounded-full opacity-60 -z-10"></div>
-        <div className="absolute bottom-0 left-0 w-16 h-16 bg-pink-200 rounded-full opacity-40 -z-10"></div>
+        <div className="absolute top-0 right-0 w-20 h-20 bg-blue-100 rounded-full opacity-60 -z-10"></div>
+        <div className="absolute bottom-0 left-0 w-16 h-16 bg-blue-200 rounded-full opacity-40 -z-10"></div>
 
         <Link
           href="/jobs"
-          className="flex items-center text-pink-600 hover:text-pink-700 mb-6 transition-colors"
+          className="flex items-center text-blue-600 hover:text-blue-700 mb-6 transition-colors"
         >
           <ArrowLeft className="h-4 w-4 mr-1" /> Back to Jobs
         </Link>
 
-        <div className="inline-flex items-center px-3 py-1 rounded-full bg-pink-100 text-pink-600 text-sm font-medium mb-4">
+        <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-600 text-sm font-medium mb-4">
           JOB DETAILS
-          <Briefcase className="h-4 w-4 ml-2 text-pink-500" />
+          <Briefcase className="h-4 w-4 ml-2 text-blue-500" />
         </div>
 
         <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-2">
           {job.title}
         </h1>
 
-        <div className="flex items-center text-pink-600 mb-4">
+        <div className="flex items-center text-blue-600 mb-4">
           <Building className="h-5 w-5 mr-2" />
           <span className="font-medium">{job.company_name}</span>
         </div>
@@ -86,15 +86,15 @@ export default async function JobDetailsPage({ params }: { params: any }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          <Card className="border border-pink-100 shadow-sm hover:shadow-md transition-shadow">
-            <CardHeader className="pb-2 border-b border-pink-50">
+          <Card className="border border-blue-100 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="pb-2 border-b border-blue-50">
               <div className="flex items-start justify-between">
                 <div>
                   <h2 className="text-xl font-semibold text-slate-800">
                     About This Role
                   </h2>
                   <div className="flex items-center text-slate-600 mt-1">
-                    <Clock className="h-4 w-4 mr-1 text-pink-500" />
+                    <Clock className="h-4 w-4 mr-1 text-blue-500" />
                     <span>
                       Posted{" "}
                       {job.created_at
@@ -105,32 +105,32 @@ export default async function JobDetailsPage({ params }: { params: any }) {
                 </div>
 
                 {/* Company identifier instead of image */}
-                <div className="h-12 w-12 rounded-full bg-pink-100 flex items-center justify-center">
-                  <span className="font-bold text-pink-600">
+                <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                  <span className="font-bold text-blue-600">
                     {job.company_name.charAt(0)}
                   </span>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="pt-6">
-              <div className="flex flex-wrap gap-y-3 gap-x-6 mb-6 p-4 bg-pink-50/50 rounded-lg">
+              <div className="flex flex-wrap gap-y-3 gap-x-6 mb-6 p-4 bg-blue-50/50 rounded-lg">
                 <div className="flex items-center">
-                  <MapPin className="h-4 w-4 mr-2 text-pink-500" />
+                  <MapPin className="h-4 w-4 mr-2 text-blue-500" />
                   <span className="text-slate-700">{job.company_location}</span>
                 </div>
                 <div className="flex items-center">
-                  <Briefcase className="h-4 w-4 mr-2 text-pink-500" />
+                  <Briefcase className="h-4 w-4 mr-2 text-blue-500" />
                   <span className="text-slate-700">{job.type}</span>
                 </div>
                 <div className="flex items-center">
-                  <DollarSign className="h-4 w-4 mr-2 text-pink-500" />
+                  <DollarSign className="h-4 w-4 mr-2 text-blue-500" />
                   <span className="text-slate-700">
                     {formatSalary(job.minimum_salary, job.maximum_salary)}
                   </span>
                 </div>
                 {job.is_remote && (
                   <div className="flex items-center">
-                    <Globe className="h-4 w-4 mr-2 text-pink-500" />
+                    <Globe className="h-4 w-4 mr-2 text-blue-500" />
                     <span className="text-slate-700">Remote</span>
                   </div>
                 )}
@@ -144,7 +144,7 @@ export default async function JobDetailsPage({ params }: { params: any }) {
                   {skills.map((tag) => (
                     <Badge
                       key={tag}
-                      className="bg-pink-100 text-pink-700 hover:bg-pink-200 border-pink-200"
+                      className="bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200"
                     >
                       {tag}
                     </Badge>
@@ -153,28 +153,28 @@ export default async function JobDetailsPage({ params }: { params: any }) {
               </div>
 
               <Tabs defaultValue="description" className="mt-6">
-                <TabsList className="mb-4 bg-pink-50 text-slate-600">
+                <TabsList className="mb-4 bg-blue-50 text-slate-600">
                   <TabsTrigger
                     value="description"
-                    className="data-[state=active]:bg-white data-[state=active]:text-pink-600 data-[state=active]:shadow-sm"
+                    className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
                   >
                     Description
                   </TabsTrigger>
                   <TabsTrigger
                     value="requirements"
-                    className="data-[state=active]:bg-white data-[state=active]:text-pink-600 data-[state=active]:shadow-sm"
+                    className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
                   >
                     Requirements
                   </TabsTrigger>
                   <TabsTrigger
                     value="benefits"
-                    className="data-[state=active]:bg-white data-[state=active]:text-pink-600 data-[state=active]:shadow-sm"
+                    className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
                   >
                     Benefits
                   </TabsTrigger>
                   <TabsTrigger
                     value="company"
-                    className="data-[state=active]:bg-white data-[state=active]:text-pink-600 data-[state=active]:shadow-sm"
+                    className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
                   >
                     Company
                   </TabsTrigger>
@@ -227,11 +227,11 @@ export default async function JobDetailsPage({ params }: { params: any }) {
         </div>
 
         <div className="lg:col-span-1">
-          <Card className="border border-pink-100 shadow-sm sticky top-24">
-            <CardHeader className="border-b border-pink-50 pb-4">
+          <Card className="border border-blue-100 shadow-sm sticky top-24">
+            <CardHeader className="border-b border-blue-50 pb-4">
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 bg-pink-100 rounded-full flex items-center justify-center">
-                  <Sparkles className="h-4 w-4 text-pink-600" />
+                <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <Sparkles className="h-4 w-4 text-blue-600" />
                 </div>
                 <CardTitle className="text-lg text-slate-800">
                   Apply for this position
