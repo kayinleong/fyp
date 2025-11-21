@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { validateSession } from "@/lib/actions/auth.action";
-import { getProfileById } from "@/lib/actions/profile.action";
-import { SubscriptionPlan } from "@/lib/domains/subscription.domain";
+import { checkPremiumAccess } from "@/lib/actions/subscription.action";
 
 export default async function SubscriptionRequired({
   children,
@@ -16,11 +15,9 @@ export default async function SubscriptionRequired({
     redirect("/login?redirect=/subscription");
   }
 
-  // Get user's profile to check subscription
-  const { profile } = await getProfileById(userId);
-  const currentPlan = profile?.subscription_plan || "FREE";
+  const { hasPremiumAccess } = await checkPremiumAccess(userId);
 
-  if (currentPlan !== SubscriptionPlan.PREMIUM) {
+  if (!hasPremiumAccess) {
     redirect("/subscription?error=premium-required");
   }
 

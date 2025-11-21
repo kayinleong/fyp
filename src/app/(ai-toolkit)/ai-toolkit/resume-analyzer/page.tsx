@@ -19,6 +19,8 @@ import {
   AnalysisResult,
 } from "@/lib/actions/resume-analyzer.action";
 import { toast } from "sonner";
+import { useSubscription } from "@/hooks/useSubscription";
+import FeatureLocked from "@/components/subscription/feature-locked";
 
 export default function ResumeAnalyzerPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -80,6 +82,8 @@ export default function ResumeAnalyzerPage() {
     return "text-red-500";
   };
 
+  const { isPremium, isLoading } = useSubscription();
+
   return (
     <div className="min-h-screen bg-white py-12">
       <div className="container mx-auto px-4 max-w-3xl">
@@ -100,7 +104,13 @@ export default function ResumeAnalyzerPage() {
           </p>
         </div>
 
-        {!analysisComplete ? (
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <Loader2 className="h-6 w-6 animate-spin" />
+          </div>
+        ) : !isPremium ? (
+          <FeatureLocked />
+        ) : !analysisComplete ? (
           <Card className="rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow border border-gray-100 mb-8">
             <CardHeader className="bg-white border-b border-gray-100">
               <CardTitle className="text-slate-800">

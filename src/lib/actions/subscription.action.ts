@@ -129,10 +129,19 @@ export async function checkPremiumAccess(userId: string): Promise<{ hasPremiumAc
             return { hasPremiumAccess: false, error };
         }
 
+        const expiresAt =
+            subscription?.expires_at instanceof Date
+                ? subscription.expires_at
+                : subscription?.expires_at
+                ? new Date(subscription.expires_at)
+                : undefined;
+
         // Check if user has an active premium subscription
-        const hasPremiumAccess = subscription?.plan_type === SubscriptionPlan.PREMIUM &&
+        const hasPremiumAccess =
+            subscription?.plan_type === SubscriptionPlan.PREMIUM &&
             subscription?.status === SubscriptionStatus.ACTIVE &&
-            subscription?.expires_at > new Date();
+            !!expiresAt &&
+            expiresAt > new Date();
 
         return { hasPremiumAccess };
     } catch (error) {
