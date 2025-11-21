@@ -154,7 +154,7 @@ export default function LoginFacialPage() {
 
   return (
     <>
-      <div className="absolute top-0 left-0 w-full p-4 text-center bg-blue-50/90">
+      <div className="absolute mt-10 w-full p-4 text-center bg-blue-50/90">
         <div className="max-w-md mx-auto">
           <h1 className="text-3xl font-bold text-blue-800 mb-2">
             Welcome Back!

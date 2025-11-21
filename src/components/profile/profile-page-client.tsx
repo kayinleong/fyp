@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getCurrentUser } from "@/lib/firebase/client";
 import ProfileForm from "@/components/profile/profile-form";
-import FacialSetupNotification from "@/components/auth/facial-setup-notification";
 import { Icons } from "@/components/icons";
 import { User } from "firebase/auth";
 
@@ -49,7 +48,6 @@ export default function ProfilePageClient() {
           </p>
         </div>
 
-        <FacialSetupNotification />
         <ProfileForm userId={user.uid} />
       </div>
     </div>

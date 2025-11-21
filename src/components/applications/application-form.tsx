@@ -27,6 +27,10 @@ import {
 } from "@/lib/domains/applications.domain";
 import { getProfileById } from "@/lib/actions/profile.action";
 import { Progress } from "@/components/ui/progress";
+import { getUserResumes } from "@/lib/actions/resume.action";
+import { Resume } from "@/lib/domains/resume.domain";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { FileText } from "lucide-react";
 
 interface ApplicationFormProps {
   jobId: string;
@@ -45,6 +49,12 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
   const [additionalInfo, setAdditionalInfo] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  
+  // Resume selection state
+  const [resumeOption, setResumeOption] = useState<"upload" | "shared">("upload");
+  const [sharedResumes, setSharedResumes] = useState<Resume[]>([]);
+  const [selectedResumeId, setSelectedResumeId] = useState<string>("");
+  const [isLoadingResumes, setIsLoadingResumes] = useState(false);
 
   // Status states
   const [error, setError] = useState("");
@@ -69,6 +79,31 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
     }
 
     fetchUserProfile();
+    fetchUserProfile();
+  }, [user]);
+
+  // Fetch user's shared resumes
+  useEffect(() => {
+    async function fetchResumes() {
+      if (user) {
+        setIsLoadingResumes(true);
+        try {
+          const { resumes } = await getUserResumes(user.uid);
+          setSharedResumes(resumes);
+          // If user has resumes, default to shared option
+          if (resumes.length > 0) {
+            setResumeOption("shared");
+            setSelectedResumeId(resumes[0].id);
+          }
+        } catch (err) {
+          console.error("Error fetching resumes:", err);
+        } finally {
+          setIsLoadingResumes(false);
+        }
+      }
+    }
+
+    fetchResumes();
   }, [user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -95,8 +130,13 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
     }
 
     // Check if resume is selected
-    if (!resumeFile) {
+    if (resumeOption === "upload" && !resumeFile) {
       setError("Please upload your resume");
+      return;
+    }
+
+    if (resumeOption === "shared" && !selectedResumeId) {
+      setError("Please select a shared resume");
       return;
     }
 
@@ -105,45 +145,58 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
 
       // Upload resume to server which will handle Firebase Storage upload
       let resumeUrl = "";
-      if (resumeFile) {
-        try {
-          // Start upload progress indication
-          setIsUploading(true);
-          setUploadProgress(10);
+      
+      if (resumeOption === "upload") {
+        if (resumeFile) {
+          try {
+            // Start upload progress indication
+            setIsUploading(true);
+            setUploadProgress(10);
 
-          // Convert file to ArrayBuffer for server upload
-          const fileBuffer = await resumeFile.arrayBuffer();
+            // Convert file to ArrayBuffer for server upload
+            const fileBuffer = await resumeFile.arrayBuffer();
 
-          // Update progress to show we've read the file and sending it
-          setUploadProgress(30);
+            // Update progress to show we've read the file and sending it
+            setUploadProgress(30);
 
-          // Use server action to upload file
-          const uploadResult = await uploadResumeFile(
-            user.uid,
-            resumeFile.name,
-            fileBuffer,
-            resumeFile.type
-          );
+            // Use server action to upload file
+            const uploadResult = await uploadResumeFile(
+              user.uid,
+              resumeFile.name,
+              fileBuffer,
+              resumeFile.type
+            );
 
-          // Update progress to show upload is complete
-          setUploadProgress(100);
+            // Update progress to show upload is complete
+            setUploadProgress(100);
 
-          if (!uploadResult.success) {
-            throw new Error(uploadResult.error || "Failed to upload resume");
-          }
+            if (!uploadResult.success) {
+              throw new Error(uploadResult.error || "Failed to upload resume");
+            }
 
-          resumeUrl = uploadResult.url;
-        } catch (uploadError) {
-          console.error("Resume upload error:", uploadError);
-          setError("Failed to upload resume. Please try again.");
-          setIsSubmitting(false);
-          setIsUploading(false);
-          return;
-        } finally {
-          // Hide the progress bar after a moment
-          setTimeout(() => {
+            resumeUrl = uploadResult.url;
+          } catch (uploadError) {
+            console.error("Resume upload error:", uploadError);
+            setError("Failed to upload resume. Please try again.");
+            setIsSubmitting(false);
             setIsUploading(false);
-          }, 500);
+            return;
+          } finally {
+            // Hide the progress bar after a moment
+            setTimeout(() => {
+              setIsUploading(false);
+            }, 500);
+          }
+        }
+      } else {
+        // Use shared resume URL
+        const selectedResume = sharedResumes.find(r => r.id === selectedResumeId);
+        if (selectedResume) {
+          resumeUrl = selectedResume.publicUrl;
+        } else {
+          setError("Selected resume not found");
+          setIsSubmitting(false);
+          return;
         }
       }
 
@@ -175,7 +228,8 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
         user_id: user.uid,
         phone_number: phone,
         year_of_experience: yearsOfExperience,
-        resume_path: resumeUrl, // Use the Firebase Storage URL from server
+        resume_path: resumeOption === "shared" ? `/resumes/view/${selectedResumeId}` : resumeUrl,
+        resume_id: resumeOption === "shared" ? selectedResumeId : "",
         additional_information: additionalInfo,
         status: ApplicationStatus.PENDING,
       } as Application);
@@ -309,42 +363,85 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
         </Select>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="resume">Resume</Label>
-        <div className="flex items-center gap-2">
-          <Input
-            id="resume"
-            type="file"
-            className="hidden"
-            accept=".pdf,.doc,.docx"
-            onChange={(e) => {
-              if (e.target.files && e.target.files[0]) {
-                setResumeFile(e.target.files[0]);
-              }
-            }}
-          />
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => document.getElementById("resume")?.click()}
-            className="w-full"
+      <div className="space-y-3">
+        <Label>Resume</Label>
+        
+        {sharedResumes.length > 0 && (
+          <RadioGroup 
+            value={resumeOption} 
+            onValueChange={(val) => setResumeOption(val as "upload" | "shared")}
+            className="flex gap-4 mb-4"
           >
-            <Upload className="h-4 w-4 mr-2" />
-            {resumeFile ? resumeFile.name : "Upload Resume"}
-          </Button>
-        </div>
-
-        {/* Show upload progress bar when uploading */}
-        {isUploading && (
-          <div className="mt-2">
-            <p className="text-xs text-primary mb-1">Uploading resume...</p>
-            <Progress value={uploadProgress} className="h-2" />
-          </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="shared" id="option-shared" />
+              <Label htmlFor="option-shared" className="cursor-pointer font-normal">Select from Shared Resumes</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="upload" id="option-upload" />
+              <Label htmlFor="option-upload" className="cursor-pointer font-normal">Upload New Resume</Label>
+            </div>
+          </RadioGroup>
         )}
 
-        <p className="text-xs text-muted-foreground">
-          Accepted formats: PDF, DOC, DOCX (Max 5MB)
-        </p>
+        {resumeOption === "shared" && sharedResumes.length > 0 ? (
+          <div className="space-y-2">
+            <Select value={selectedResumeId} onValueChange={setSelectedResumeId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a resume" />
+              </SelectTrigger>
+              <SelectContent>
+                {sharedResumes.map((resume) => (
+                  <SelectItem key={resume.id} value={resume.id}>
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-blue-500" />
+                      <span>{resume.fileName}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Choose one of your previously uploaded resumes.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Input
+                id="resume"
+                type="file"
+                className="hidden"
+                accept=".pdf,.doc,.docx"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    setResumeFile(e.target.files[0]);
+                  }
+                }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => document.getElementById("resume")?.click()}
+                className="w-full"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                {resumeFile ? resumeFile.name : "Upload Resume"}
+              </Button>
+            </div>
+
+            {/* Show upload progress bar when uploading */}
+            {isUploading && (
+              <div className="mt-2">
+                <p className="text-xs text-primary mb-1">Uploading resume...</p>
+                <Progress value={uploadProgress} className="h-2" />
+              </div>
+            )}
+
+            <p className="text-xs text-muted-foreground">
+              Accepted formats: PDF, DOC, DOCX (Max 5MB)
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">

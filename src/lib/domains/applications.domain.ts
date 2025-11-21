@@ -7,6 +7,7 @@ export interface Application {
     phone_number: string;
     year_of_experience: number;
     resume_path: string;
+    resume_id?: string; // Optional: ID of the shared resume if selected
     additional_information: string;
     status: ApplicationStatus;
     created_at?: string;
