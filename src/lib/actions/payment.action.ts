@@ -5,6 +5,8 @@ import { getFirestore } from "firebase-admin/firestore";
 import admin from "@/lib/firebase/server";
 import { SubscriptionPlan } from "@/lib/domains/subscription.domain";
 import { headers } from "next/headers";
+import { validateSession } from "@/lib/actions/auth.action";
+import { checkPremiumAccess } from "@/lib/actions/subscription.action";
 
 function getDb() {
   return getFirestore();
@@ -17,34 +19,41 @@ interface CreateCheckoutSessionParams {
 }
 
 // Stripe product and price IDs - Configure these in your Stripe dashboard
-const STRIPE_PRICES: Record<string, string> = {
-  [SubscriptionPlan.PREMIUM]: process.env.STRIPE_PREMIUM_PRICE_ID || "price_1234567890",
-};
-
 export async function createCheckoutSession({
   userId,
   planType,
   userEmail,
 }: CreateCheckoutSessionParams) {
   try {
-    if (!STRIPE_PRICES[planType]) {
-      throw new Error(`No Stripe price configured for plan: ${planType}`);
-    }
+    // STRIPE_PRICES check removed as we use inline pricing
 
     const headersList = await headers();
-    const origin = headersList.get("referer") || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const origin =
+      headersList.get("referer") ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      "http://localhost:3000";
     const baseUrl = new URL(origin).origin;
 
-  // Create Stripe checkout session
-  const stripe = getStripe();
+    // Create Stripe checkout session
+    const stripe = getStripe();
 
-  const session = await stripe.checkout.sessions.create({
+    const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "subscription",
       customer_email: userEmail,
       line_items: [
         {
-          price: STRIPE_PRICES[planType],
+          price_data: {
+            currency: "myr",
+            product_data: {
+              name: "Premium Plan",
+              description: "Full access to all features including AI tools",
+            },
+            unit_amount: 1999, // RM19.99
+            recurring: {
+              interval: "month",
+            },
+          },
           quantity: 1,
         },
       ],
@@ -64,7 +73,9 @@ export async function createCheckoutSession({
   } catch (error) {
     console.error("Error creating checkout session:", error);
     throw new Error(
-      error instanceof Error ? error.message : "Failed to create checkout session"
+      error instanceof Error
+        ? error.message
+        : "Failed to create checkout session"
     );
   }
 }
@@ -75,46 +86,51 @@ export async function handleCheckoutSessionCompleted(
   planType: string
 ) {
   try {
-  // Get the checkout session details
-  const stripe = getStripe();
-  const session = await stripe.checkout.sessions.retrieve(sessionId);
+    // Get the checkout session details
+    const stripe = getStripe();
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     if (session.payment_status !== "paid") {
       throw new Error("Payment not completed");
     }
 
+    // Verify user exists in Firebase Auth and get details
+    const userRecord = await admin.auth().getUser(userId);
+    const userEmail = userRecord.email || null;
+    const userDisplayName = userRecord.displayName || null;
+
     // Update user subscription in Firestore
     const db = getDb();
-    const userDocRef = db.collection("users").doc(userId);
-    const userDoc = await userDocRef.get();
-
-    if (!userDoc.exists) {
-      throw new Error("User not found");
-    }
 
     const now = new Date();
     const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
 
-    await userDocRef.update({
-      subscription_plan: planType,
-      subscription_status: "active",
-      subscription_start_date: now,
-      subscription_end_date: expiresAt,
-      stripe_customer_id: session.customer,
+    // Update or create document in Subscriptions collection using userId as doc ID
+    const subscriptionRef = db.collection("Subscriptions").doc(userId);
+
+    const subscriptionData = {
+      user_id: userId,
+      email: userEmail,
+      displayName: userDisplayName,
+      plan_type: planType,
+      status: "ACTIVE",
+      starts_at: now,
+      expires_at: expiresAt,
       stripe_subscription_id: session.subscription,
-      updated_at: now,
-    });
+      stripe_customer_id: session.customer,
+      updated_at: admin.firestore.FieldValue.serverTimestamp(),
+    };
 
-    // Keep the user's profile document in sync if it exists
-    const profileRef = db.collection("Profiles").doc(userId);
-    const profileSnapshot = await profileRef.get();
+    // Check if subscription exists to determine if we need to set created_at
+    const subSnap = await subscriptionRef.get();
 
-    if (profileSnapshot.exists) {
-      await profileRef.update({
-        subscription_plan: planType,
-        subscription_id: session.subscription,
-        updated_at: admin.firestore.FieldValue.serverTimestamp(),
+    if (!subSnap.exists) {
+      await subscriptionRef.set({
+        ...subscriptionData,
+        created_at: admin.firestore.FieldValue.serverTimestamp(),
       });
+    } else {
+      await subscriptionRef.update(subscriptionData);
     }
 
     return { success: true };
@@ -128,8 +144,8 @@ export async function handleCheckoutSessionCompleted(
 
 export async function verifyCheckoutSession(sessionId: string) {
   try {
-  const stripe = getStripe();
-  const session = await stripe.checkout.sessions.retrieve(sessionId);
+    const stripe = getStripe();
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     return {
       success: true,
@@ -143,5 +159,43 @@ export async function verifyCheckoutSession(sessionId: string) {
     throw new Error(
       error instanceof Error ? error.message : "Failed to verify session"
     );
+  }
+}
+
+export async function checkPaymentAndActivate(sessionId: string) {
+  try {
+    const sessionResponse = await validateSession();
+    const userId = sessionResponse.user?.uid;
+
+    if (!userId) {
+      return { success: false, error: "Authentication required" };
+    }
+
+    // 1. Verify the session with Stripe
+    const sessionData = await verifyCheckoutSession(sessionId);
+
+    if (sessionData.paymentStatus !== "paid") {
+      return { success: false, error: "Payment not completed yet" };
+    }
+
+    // 2. Trigger the completion handler (idempotent-ish)
+    // We call this to ensure the subscription is created/updated if the webhook hasn't fired yet
+    const planType = sessionData.metadata?.planType || SubscriptionPlan.PREMIUM;
+
+    await handleCheckoutSessionCompleted(sessionId, userId, planType);
+
+    // 3. Check if the user now has premium access
+    const { hasPremiumAccess } = await checkPremiumAccess(userId);
+
+    return {
+      success: true,
+      isPremium: hasPremiumAccess,
+    };
+  } catch (error) {
+    console.error("Error checking payment and activating:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to check payment",
+    };
   }
 }

@@ -9,14 +9,18 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Check } from "lucide-react";
 import { validateSession } from "@/lib/actions/auth.action";
-import { getProfileById } from "@/lib/actions/profile.action";
+
 import {
   SUBSCRIPTION_PLANS,
   SubscriptionPlan,
 } from "@/lib/domains/subscription.domain";
 import { redirect } from "next/navigation";
 import StripeCheckoutButton from "@/components/subscription/stripe-checkout-button";
-import { checkPremiumAccess } from "@/lib/actions/subscription.action";
+import PaymentSuccessPoller from "@/components/subscription/payment-success-poller";
+import {
+  checkPremiumAccess,
+  getUserActiveSubscription,
+} from "@/lib/actions/subscription.action";
 
 export default async function SubscriptionPage({
   searchParams,
@@ -33,14 +37,30 @@ export default async function SubscriptionPage({
   }
 
   // Get user's profile to check current subscription
-  const { profile } = await getProfileById(userId);
+  // Get user's active subscription
+  const { subscription } = await getUserActiveSubscription(userId);
   const { hasPremiumAccess } = await checkPremiumAccess(userId);
+
   const currentPlan = hasPremiumAccess
     ? SubscriptionPlan.PREMIUM
-    : (profile?.subscription_plan as SubscriptionPlan) || SubscriptionPlan.FREE;
+    : subscription?.plan_type || SubscriptionPlan.FREE;
 
   const resolvedSearchParams = await searchParams;
   const showPremiumRequired = resolvedSearchParams.error === "premium-required";
+  const showSuccess =
+    resolvedSearchParams.success === "true" && resolvedSearchParams.session_id;
+
+  // Handle successful payment redirect
+  if (showSuccess) {
+    const sessionId = resolvedSearchParams.session_id as string;
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] py-8 px-4">
+        <div className="w-full max-w-md">
+          <PaymentSuccessPoller sessionId={sessionId} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] py-8 px-4">
@@ -75,7 +95,7 @@ export default async function SubscriptionPage({
                   {plan.name}
                   {plan.price > 0 && (
                     <div className="text-2xl font-bold">
-                      ${plan.price}
+                      RM{plan.price}
                       <span className="text-sm font-normal text-muted-foreground">
                         /month
                       </span>
