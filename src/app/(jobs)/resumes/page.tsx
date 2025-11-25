@@ -2,7 +2,7 @@ import { validateSession } from "@/lib/actions/auth.action";
 import { getUserResumes } from "@/lib/actions/resume.action";
 import { ResumeList } from "@/components/resumes/resume-list";
 import { Button } from "@/components/ui/button";
-import { FileText, Plus } from "lucide-react";
+import { FileText } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -13,7 +13,7 @@ export default async function ResumeSharingPage() {
     redirect("/login");
   }
 
-  const { resumes, error } = await getUserResumes(user.uid);
+  const { resumes } = await getUserResumes(user.uid);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
@@ -30,7 +30,11 @@ export default async function ResumeSharingPage() {
       </div>
 
       <div className="mb-8">
-        <Button asChild size="lg" className="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 shadow-sm">
+        <Button
+          asChild
+          size="lg"
+          className="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 shadow-sm"
+        >
           <Link href="/resumes/create">
             <FileText className="mr-2 h-5 w-5" />
             Add Resume to Share

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import type React from "react";
@@ -99,9 +100,7 @@ export default function ResumeAnalyzerPage() {
     // If premium user, require facial verification first
     if (isPremium) {
       if (!existingFaceDescriptor) {
-        toast.error(
-          "Facial profile not found. Please complete setup first."
-        );
+        toast.error("Facial profile not found. Please complete setup first.");
         window.location.href = "/setup-facial";
         return;
       }

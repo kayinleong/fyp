@@ -15,7 +15,7 @@ export default async function EditResumePage({ params }: EditResumePageProps) {
   }
 
   const { id } = await params;
-  const { resume, error } = await getResumeById(id);
+  const { resume } = await getResumeById(id);
 
   if (!resume) {
     notFound();

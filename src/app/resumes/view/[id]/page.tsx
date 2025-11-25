@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -7,8 +9,22 @@ import { Resume } from "@/lib/domains/resume.domain";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Loader2, Lock, Clock, EyeOff, FileText, AlertCircle, ShieldCheck } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import {
+  Loader2,
+  Lock,
+  Clock,
+  EyeOff,
+  FileText,
+  AlertCircle,
+  ShieldCheck,
+} from "lucide-react";
 
 export default function ResumeViewerPage() {
   const params = useParams();
@@ -17,7 +33,7 @@ export default function ResumeViewerPage() {
   const [resume, setResume] = useState<Resume | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Security states
   const [isPasswordProtected, setIsPasswordProtected] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
@@ -29,8 +45,9 @@ export default function ResumeViewerPage() {
     async function fetchResume() {
       setIsLoading(true);
       try {
-        const { resume: fetchedResume, error: fetchError } = await getResumeById(id);
-        
+        const { resume: fetchedResume, error: fetchError } =
+          await getResumeById(id);
+
         if (fetchError || !fetchedResume) {
           setError(fetchError || "Resume not found");
           setIsLoading(false);
@@ -38,15 +55,20 @@ export default function ResumeViewerPage() {
         }
 
         // 1. Check Expiration
-        if (fetchedResume.securityOptions.timeLimited && fetchedResume.securityOptions.expirationDate) {
-            const expirationDate = new Date(fetchedResume.securityOptions.expirationDate);
-            if (new Date() > expirationDate) {
-                setIsExpired(true);
-                setIsLoading(false);
-                return;
-            }
+        if (
+          fetchedResume.securityOptions.timeLimited &&
+          fetchedResume.securityOptions.expirationDate
+        ) {
+          const expirationDate = new Date(
+            fetchedResume.securityOptions.expirationDate
+          );
+          if (new Date() > expirationDate) {
+            setIsExpired(true);
+            setIsLoading(false);
+            return;
+          }
         }
-        
+
         setResume(fetchedResume);
 
         // 2. Check Password Protection
@@ -56,7 +78,6 @@ export default function ResumeViewerPage() {
           // If not password protected, we still wait for user to click "View"
           setIsAuthenticated(true);
         }
-
       } catch (err) {
         console.error("Error loading resume:", err);
         setError("Failed to load resume");
@@ -71,7 +92,7 @@ export default function ResumeViewerPage() {
   }, [id]);
 
   const handleOneTimeView = async () => {
-      // Logic for one-time view tracking would go here
+    // Logic for one-time view tracking would go here
   };
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
@@ -80,7 +101,7 @@ export default function ResumeViewerPage() {
       setIsAuthenticated(true);
       setIsRevealed(true);
       if (resume.securityOptions.oneTimeView) {
-          handleOneTimeView();
+        handleOneTimeView();
       }
     } else {
       setError("Incorrect password");
@@ -88,10 +109,10 @@ export default function ResumeViewerPage() {
   };
 
   const handleViewResume = () => {
-      setIsRevealed(true);
-      if (resume?.securityOptions.oneTimeView) {
-          handleOneTimeView();
-      }
+    setIsRevealed(true);
+    if (resume?.securityOptions.oneTimeView) {
+      handleOneTimeView();
+    }
   };
 
   if (isLoading) {
@@ -140,7 +161,7 @@ export default function ResumeViewerPage() {
   // Interstitial State: Show controls before revealing
   if (!isRevealed) {
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
         <Card className="w-full max-w-md shadow-lg">
           <CardHeader className="text-center">
             <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
@@ -153,73 +174,89 @@ export default function ResumeViewerPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-                {resume?.securityOptions.passwordProtected && (
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-md border">
-                        <Lock className="h-5 w-5 text-blue-600" />
-                        <div className="text-sm">
-                            <p className="font-medium">Password Protected</p>
-                            <p className="text-muted-foreground">Requires a password to view</p>
-                        </div>
+              {resume?.securityOptions.passwordProtected && (
+                <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-md border">
+                  <Lock className="h-5 w-5 text-blue-600" />
+                  <div className="text-sm">
+                    <p className="font-medium">Password Protected</p>
+                    <p className="text-muted-foreground">
+                      Requires a password to view
+                    </p>
+                  </div>
+                </div>
+              )}
+              {resume?.securityOptions.timeLimited && (
+                <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-md border">
+                  <Clock className="h-5 w-5 text-orange-600" />
+                  <div className="text-sm">
+                    <p className="font-medium">Time Limited</p>
+                    <p className="text-muted-foreground">
+                      Expires on{" "}
+                      {new Date(
+                        resume.securityOptions.expirationDate!
+                      ).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              )}
+              {resume?.securityOptions.oneTimeView && (
+                <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-md border">
+                  <EyeOff className="h-5 w-5 text-purple-600" />
+                  <div className="text-sm">
+                    <p className="font-medium">One-Time View</p>
+                    <p className="text-muted-foreground">
+                      Can only be viewed once
+                    </p>
+                  </div>
+                </div>
+              )}
+              {!resume?.securityOptions.passwordProtected &&
+                !resume?.securityOptions.timeLimited &&
+                !resume?.securityOptions.oneTimeView && (
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-md border">
+                    <FileText className="h-5 w-5 text-green-600" />
+                    <div className="text-sm">
+                      <p className="font-medium">Standard Access</p>
+                      <p className="text-muted-foreground">
+                        No specific restrictions applied
+                      </p>
                     </div>
-                )}
-                {resume?.securityOptions.timeLimited && (
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-md border">
-                        <Clock className="h-5 w-5 text-orange-600" />
-                        <div className="text-sm">
-                            <p className="font-medium">Time Limited</p>
-                            <p className="text-muted-foreground">
-                                Expires on {new Date(resume.securityOptions.expirationDate!).toLocaleDateString()}
-                            </p>
-                        </div>
-                    </div>
-                )}
-                {resume?.securityOptions.oneTimeView && (
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-md border">
-                        <EyeOff className="h-5 w-5 text-purple-600" />
-                        <div className="text-sm">
-                            <p className="font-medium">One-Time View</p>
-                            <p className="text-muted-foreground">Can only be viewed once</p>
-                        </div>
-                    </div>
-                )}
-                {!resume?.securityOptions.passwordProtected && !resume?.securityOptions.timeLimited && !resume?.securityOptions.oneTimeView && (
-                     <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-md border">
-                     <FileText className="h-5 w-5 text-green-600" />
-                     <div className="text-sm">
-                         <p className="font-medium">Standard Access</p>
-                         <p className="text-muted-foreground">No specific restrictions applied</p>
-                     </div>
-                 </div>
+                  </div>
                 )}
             </div>
 
             {isPasswordProtected ? (
-                 <form onSubmit={handlePasswordSubmit} className="space-y-4 pt-2">
-                 <div className="space-y-2">
-                   <Label htmlFor="password">Enter Password to Unlock</Label>
-                   <Input
-                     id="password"
-                     type="password"
-                     value={passwordInput}
-                     onChange={(e) => {
-                       setPasswordInput(e.target.value);
-                       setError(null);
-                     }}
-                     placeholder="Password"
-                     className={error ? "border-red-500" : ""}
-                   />
-                   {error && <p className="text-sm text-red-500">{error}</p>}
-                 </div>
-                 <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
-                   Unlock & View Resume
-                 </Button>
-               </form>
-            ) : (
-                <Button onClick={handleViewResume} className="w-full bg-blue-600 hover:bg-blue-700 mt-4">
-                    View Resume
+              <form onSubmit={handlePasswordSubmit} className="space-y-4 pt-2">
+                <div className="space-y-2">
+                  <Label htmlFor="password">Enter Password to Unlock</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={passwordInput}
+                    onChange={(e) => {
+                      setPasswordInput(e.target.value);
+                      setError(null);
+                    }}
+                    placeholder="Password"
+                    className={error ? "border-red-500" : ""}
+                  />
+                  {error && <p className="text-sm text-red-500">{error}</p>}
+                </div>
+                <Button
+                  type="submit"
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  Unlock & View Resume
                 </Button>
+              </form>
+            ) : (
+              <Button
+                onClick={handleViewResume}
+                className="w-full bg-blue-600 hover:bg-blue-700 mt-4"
+              >
+                View Resume
+              </Button>
             )}
-
           </CardContent>
         </Card>
       </div>
@@ -231,34 +268,34 @@ export default function ResumeViewerPage() {
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <header className="bg-white shadow-sm py-4 px-6 flex justify-between items-center">
         <div className="flex items-center gap-2">
-            <div className="bg-blue-100 p-2 rounded-lg">
-                <FileText className="h-5 w-5 text-blue-600" />
-            </div>
-            <div>
-                <h1 className="font-semibold text-gray-900">{resume?.fileName}</h1>
-                <p className="text-xs text-gray-500">Secure Resume View</p>
-            </div>
+          <div className="bg-blue-100 p-2 rounded-lg">
+            <FileText className="h-5 w-5 text-blue-600" />
+          </div>
+          <div>
+            <h1 className="font-semibold text-gray-900">{resume?.fileName}</h1>
+            <p className="text-xs text-gray-500">Secure Resume View</p>
+          </div>
         </div>
         {resume?.securityOptions.oneTimeView && (
-            <div className="flex items-center gap-2 text-amber-600 bg-amber-50 px-3 py-1 rounded-full text-sm">
-                <EyeOff className="h-4 w-4" />
-                <span>One-time view</span>
-            </div>
+          <div className="flex items-center gap-2 text-amber-600 bg-amber-50 px-3 py-1 rounded-full text-sm">
+            <EyeOff className="h-4 w-4" />
+            <span>One-time view</span>
+          </div>
         )}
       </header>
       <main className="flex-1 p-4 md:p-8">
         <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-sm overflow-hidden h-[80vh]">
-            {resume?.publicUrl ? (
-                <iframe 
-                    src={`${resume.publicUrl}#toolbar=0`} 
-                    className="w-full h-full border-0"
-                    title="Resume PDF"
-                />
-            ) : (
-                <div className="flex items-center justify-center h-full text-gray-400">
-                    No PDF file available
-                </div>
-            )}
+          {resume?.publicUrl ? (
+            <iframe
+              src={`${resume.publicUrl}#toolbar=0`}
+              className="w-full h-full border-0"
+              title="Resume PDF"
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full text-gray-400">
+              No PDF file available
+            </div>
+          )}
         </div>
       </main>
     </div>
