@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/icons";
-import { Pencil, Star } from "lucide-react";
+import { Pencil, Star, Calendar } from "lucide-react";
 import { getProfileById } from "@/lib/actions/profile.action";
 import { getUserActiveSubscription } from "@/lib/actions/subscription.action";
 import { SubscriptionPlan } from "@/lib/domains/subscription.domain";
@@ -22,6 +22,7 @@ export default function ProfileOverview({ userId }: ProfileOverviewProps) {
   const [subscriptionDetails, setSubscriptionDetails] = useState<{
     plan: SubscriptionPlan;
     isActive: boolean;
+    expiresAt?: Date | string;
   }>({
     plan: SubscriptionPlan.FREE,
     isActive: true,
@@ -41,9 +42,17 @@ export default function ProfileOverview({ userId }: ProfileOverviewProps) {
         // Fetch subscription
         const { subscription } = await getUserActiveSubscription(userId);
         if (subscription) {
+          const expiresAt =
+            subscription.expires_at instanceof Date
+              ? subscription.expires_at
+              : subscription.expires_at
+              ? new Date(subscription.expires_at)
+              : undefined;
+
           setSubscriptionDetails({
             plan: subscription.plan_type,
             isActive: true,
+            expiresAt,
           });
         }
       } catch (error) {
@@ -85,14 +94,20 @@ export default function ProfileOverview({ userId }: ProfileOverviewProps) {
     );
   }
 
+  const isCompanyAccount = profile.role === "COMPANY";
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle>Account Overview</CardTitle>
         <Badge
-          variant={subscriptionDetails.plan === SubscriptionPlan.PREMIUM ? "default" : "secondary"}
+          variant={
+            isCompanyAccount || subscriptionDetails.plan === SubscriptionPlan.PREMIUM
+              ? "default"
+              : "secondary"
+          }
         >
-          {subscriptionDetails.plan} Plan
+          {isCompanyAccount ? "Company Plan" : `${subscriptionDetails.plan} Plan`}
         </Badge>
       </CardHeader>
       <CardContent>
@@ -122,20 +137,48 @@ export default function ProfileOverview({ userId }: ProfileOverviewProps) {
             </div>
           )}
 
-          <div className="pt-4 flex gap-3">
+          {!isCompanyAccount &&
+            subscriptionDetails.plan === SubscriptionPlan.PREMIUM &&
+            subscriptionDetails.expiresAt && (
+              <div className="flex flex-col space-y-1">
+                <dt className="text-sm font-medium text-muted-foreground">
+                  Premium Expires
+                </dt>
+                <dd className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <span>
+                    {new Date(subscriptionDetails.expiresAt).toLocaleDateString(
+                      "en-US",
+                      {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      }
+                    )}
+                  </span>
+                </dd>
+              </div>
+            )}
+
+          <div className="pt-4 flex flex-col gap-3">
             <Button variant="outline" asChild>
               <Link href="/profile/edit">
                 <Pencil className="mr-2 h-4 w-4" />
                 Edit Profile
               </Link>
             </Button>
-            {subscriptionDetails.plan === SubscriptionPlan.FREE && (
+            {!isCompanyAccount && subscriptionDetails.plan === SubscriptionPlan.FREE && (
               <Button asChild>
                 <Link href="/subscription">
                   <Star className="mr-2 h-4 w-4" />
                   Upgrade to Premium
                 </Link>
               </Button>
+            )}
+            {isCompanyAccount && (
+              <p className="text-sm text-muted-foreground">
+                Employer accounts include unlimited job postings and do not support Premium upgrades.
+              </p>
             )}
           </div>
         </dl>

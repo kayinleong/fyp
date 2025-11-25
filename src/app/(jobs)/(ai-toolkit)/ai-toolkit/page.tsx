@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Mic, FileText, ArrowRight, History, Sparkles } from "lucide-react";
 import ResumeAnalysisHistory from "@/components/resume-analysis/resume-analysis-history";
+import MockInterviewHistory from "@/components/mock-interview/mock-interview-history";
 
 export default function AIToolkitPage() {
   return (
@@ -76,17 +77,28 @@ export default function AIToolkitPage() {
             </div>
 
             <div className="mt-auto">
-              <Button
-                asChild
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-6"
-              >
-                <Link
-                  href="/ai-toolkit/mock-interview"
-                  className="flex items-center justify-center"
+              <div className="flex space-x-3">
+                <Button
+                  asChild
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-6"
                 >
-                  Start Mock Interview <ArrowRight className="h-4 w-4 ml-2" />
-                </Link>
-              </Button>
+                  <Link
+                    href="/ai-toolkit/mock-interview"
+                    className="flex items-center justify-center"
+                  >
+                    Start Mock Interview <ArrowRight className="h-4 w-4 ml-2" />
+                  </Link>
+                </Button>
+                <MockInterviewHistory>
+                  <Button
+                    variant="outline"
+                    className="flex items-center justify-center rounded-xl border-gray-200 hover:bg-gray-50"
+                  >
+                    <History className="h-4 w-4 mr-2" />
+                    History
+                  </Button>
+                </MockInterviewHistory>
+              </div>
             </div>
           </div>
         </div>

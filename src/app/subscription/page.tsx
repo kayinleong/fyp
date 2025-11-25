@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Check } from "lucide-react";
 import { validateSession } from "@/lib/actions/auth.action";
 
@@ -15,12 +15,13 @@ import {
   SubscriptionPlan,
 } from "@/lib/domains/subscription.domain";
 import { redirect } from "next/navigation";
-import StripeCheckoutButton from "@/components/subscription/stripe-checkout-button";
 import PaymentSuccessPoller from "@/components/subscription/payment-success-poller";
 import {
   checkPremiumAccess,
   getUserActiveSubscription,
 } from "@/lib/actions/subscription.action";
+import StripeCheckoutButton from "@/components/subscription/stripe-checkout-button";
+import { getProfileById } from "@/lib/actions/profile.action";
 
 export default async function SubscriptionPage({
   searchParams,
@@ -36,14 +37,35 @@ export default async function SubscriptionPage({
     redirect("/login?redirect=/subscription");
   }
 
-  // Get user's profile to check current subscription
+  const { profile } = await getProfileById(userId);
+  const isCompanyUser = profile?.role === "COMPANY";
+
   // Get user's active subscription
   const { subscription } = await getUserActiveSubscription(userId);
   const { hasPremiumAccess } = await checkPremiumAccess(userId);
 
-  const currentPlan = hasPremiumAccess
-    ? SubscriptionPlan.PREMIUM
-    : subscription?.plan_type || SubscriptionPlan.FREE;
+  const currentPlan = isCompanyUser
+    ? SubscriptionPlan.FREE
+    : hasPremiumAccess
+      ? SubscriptionPlan.PREMIUM
+      : subscription?.plan_type || SubscriptionPlan.FREE;
+
+  const availablePlans = isCompanyUser
+    ? [
+        {
+          ...SUBSCRIPTION_PLANS[SubscriptionPlan.FREE],
+          name: "Company Plan",
+          description:
+            "Everything you need to post roles, manage applicants, and build your team.",
+          features: [
+            "Post unlimited jobs",
+            "Manage applicants in one place",
+            "Edit and duplicate job listings",
+            "Track application activity in real time",
+          ],
+        },
+      ]
+    : Object.values(SUBSCRIPTION_PLANS);
 
   const resolvedSearchParams = await searchParams;
   const showPremiumRequired = resolvedSearchParams.error === "premium-required";
@@ -66,11 +88,20 @@ export default async function SubscriptionPage({
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] py-8 px-4">
       <div className="w-full">
         <div className="text-center mb-12">
-          {showPremiumRequired && (
+          {showPremiumRequired && !isCompanyUser && (
             <Alert className="mb-6 bg-yellow-50 border-yellow-200">
               <AlertDescription className="text-yellow-800">
                 This feature requires a Premium subscription. Please upgrade
                 your plan to access AI tools.
+              </AlertDescription>
+            </Alert>
+          )}
+          {isCompanyUser && (
+            <Alert className="mb-6 bg-blue-50 border-blue-200">
+              <AlertTitle className="text-blue-900">Employer plan</AlertTitle>
+              <AlertDescription className="text-blue-800">
+                Company accounts already include all hiring tools. Premium
+                upgrades are only for job seekers.
               </AlertDescription>
             </Alert>
           )}
@@ -81,7 +112,7 @@ export default async function SubscriptionPage({
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mx-auto max-w-4xl">
-          {Object.values(SUBSCRIPTION_PLANS).map((plan) => (
+          {availablePlans.map((plan) => (
             <Card
               key={plan.plan}
               className={`${
@@ -95,7 +126,7 @@ export default async function SubscriptionPage({
                   {plan.name}
                   {plan.price > 0 && (
                     <div className="text-2xl font-bold">
-                      RM{plan.price}
+                      MYR {plan.price}
                       <span className="text-sm font-normal text-muted-foreground">
                         /month
                       </span>
@@ -130,6 +161,7 @@ export default async function SubscriptionPage({
                       userEmail={userEmail}
                       planType={plan.plan}
                       planName={plan.name}
+                      requireFacialVerification
                     />
                   ) : null}
                 </div>
@@ -138,7 +170,7 @@ export default async function SubscriptionPage({
           ))}
         </div>
 
-        {currentPlan === SubscriptionPlan.FREE && (
+        {currentPlan === SubscriptionPlan.FREE && !isCompanyUser && (
           <div className="mt-8 text-center">
             <p className="text-muted-foreground mb-2">
               Want to access advanced AI features?

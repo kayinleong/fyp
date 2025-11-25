@@ -7,6 +7,7 @@ import { SubscriptionPlan } from "@/lib/domains/subscription.domain";
 import { headers } from "next/headers";
 import { validateSession } from "@/lib/actions/auth.action";
 import { checkPremiumAccess } from "@/lib/actions/subscription.action";
+import { getProfileById } from "@/lib/actions/profile.action";
 
 function getDb() {
   return getFirestore();
@@ -25,6 +26,25 @@ export async function createCheckoutSession({
   userEmail,
 }: CreateCheckoutSessionParams) {
   try {
+    const sessionResponse = await validateSession();
+    const authedUserId = sessionResponse.user?.uid;
+    const authedEmail = sessionResponse.user?.email || userEmail;
+
+    if (!authedUserId || authedUserId !== userId) {
+      return {
+        success: false,
+        error: "Authentication required. Please sign in again.",
+      };
+    }
+
+    const { profile } = await getProfileById(authedUserId);
+    if (profile?.role === "COMPANY") {
+      return {
+        success: false,
+        error: "Employer accounts already include all hiring tools.",
+      };
+    }
+
     // STRIPE_PRICES check removed as we use inline pricing
 
     const headersList = await headers();
@@ -40,7 +60,7 @@ export async function createCheckoutSession({
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "subscription",
-      customer_email: userEmail,
+      customer_email: authedEmail,
       line_items: [
         {
           price_data: {
@@ -60,7 +80,7 @@ export async function createCheckoutSession({
       success_url: `${baseUrl}/subscription?success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/subscription?canceled=true`,
       metadata: {
-        userId,
+        userId: authedUserId,
         planType,
       },
     });
