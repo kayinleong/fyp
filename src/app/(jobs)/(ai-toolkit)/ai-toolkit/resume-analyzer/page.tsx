@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import type React from "react";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,8 +22,19 @@ import {
 import { toast } from "sonner";
 import { useSubscription } from "@/hooks/useSubscription";
 import FeatureLocked from "@/components/subscription/feature-locked";
+import { getFacialData } from "@/lib/actions/facial.action";
+import FacialRecognition from "@/components/auth/facial-recognition";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useAuth } from "@/lib/contexts/auth-context";
 
 export default function ResumeAnalyzerPage() {
+  const { user } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -31,6 +43,11 @@ export default function ResumeAnalyzerPage() {
     null
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [facialVerificationOpen, setFacialVerificationOpen] = useState(false);
+  const [existingFaceDescriptor, setExistingFaceDescriptor] = useState<
+    number[] | null
+  >(null);
+  const [isLoadingFacialData, setIsLoadingFacialData] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -42,7 +59,61 @@ export default function ResumeAnalyzerPage() {
     fileInputRef.current?.click();
   };
 
+  const resetAnalysis = () => {
+    setFile(null);
+    setAnalysisComplete(false);
+    setAnalysisResults(null);
+  };
+
+  const getSectionScoreColor = (score: number) => {
+    if (score >= 85) return "text-green-500";
+    if (score >= 70) return "text-amber-500";
+    return "text-red-500";
+  };
+
+  const { isPremium, isLoading } = useSubscription();
+
+  // Load facial data for premium users
+  useEffect(() => {
+    async function loadFacialData() {
+      if (!isPremium || !user?.uid) return;
+
+      setIsLoadingFacialData(true);
+      try {
+        const result = await getFacialData(user.uid);
+        if (result.success && result.data) {
+          setExistingFaceDescriptor(result.data);
+        }
+      } catch (error) {
+        console.error("Failed to load facial data", error);
+      } finally {
+        setIsLoadingFacialData(false);
+      }
+    }
+
+    loadFacialData();
+  }, [isPremium, user?.uid]);
+
   const handleAnalyze = async () => {
+    if (!file) return;
+
+    // If premium user, require facial verification first
+    if (isPremium) {
+      if (!existingFaceDescriptor) {
+        toast.error("Facial profile not found. Please complete setup first.");
+        window.location.href = "/setup-facial";
+        return;
+      }
+      // Show verification dialog
+      setFacialVerificationOpen(true);
+      return;
+    }
+
+    // Non-premium users (shouldn't reach here, but handle anyway)
+    await proceedWithAnalysis();
+  };
+
+  const proceedWithAnalysis = async () => {
     if (!file) return;
 
     try {
@@ -70,19 +141,18 @@ export default function ResumeAnalyzerPage() {
     }
   };
 
-  const resetAnalysis = () => {
-    setFile(null);
-    setAnalysisComplete(false);
-    setAnalysisResults(null);
+  const handleFacialVerificationComplete = (
+    _descriptor: number[] | null,
+    success?: boolean
+  ) => {
+    if (success) {
+      setFacialVerificationOpen(false);
+      toast.success("Identity verified. Analyzing resume...");
+      proceedWithAnalysis();
+    } else {
+      toast.error("Facial verification failed. Please try again.");
+    }
   };
-
-  const getSectionScoreColor = (score: number) => {
-    if (score >= 85) return "text-green-500";
-    if (score >= 70) return "text-amber-500";
-    return "text-red-500";
-  };
-
-  const { isPremium, isLoading } = useSubscription();
 
   return (
     <div className="min-h-screen bg-white py-12">
@@ -341,6 +411,34 @@ export default function ResumeAnalyzerPage() {
           </div>
         )}
       </div>
+
+      {/* Facial Verification Dialog */}
+      {isPremium && existingFaceDescriptor && (
+        <Dialog
+          open={facialVerificationOpen}
+          onOpenChange={setFacialVerificationOpen}
+        >
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>Verify your identity</DialogTitle>
+              <DialogDescription>
+                Please complete a quick facial scan to analyze your resume. This
+                helps us keep your account secure.
+              </DialogDescription>
+            </DialogHeader>
+
+            <FacialRecognition
+              mode="verify"
+              existingFaceDescriptor={existingFaceDescriptor}
+              onComplete={handleFacialVerificationComplete}
+              onCancel={() => {
+                setFacialVerificationOpen(false);
+              }}
+              userName={user?.displayName || user?.email || "User"}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

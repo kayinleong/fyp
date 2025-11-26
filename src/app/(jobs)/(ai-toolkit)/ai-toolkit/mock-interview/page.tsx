@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -35,6 +36,7 @@ import {
   generateInterviewQuestions,
   evaluateInterviewResponses,
 } from "@/lib/actions/mock-interview.action";
+import { saveMockInterviewResult } from "@/lib/actions/mock-interview-history.action";
 import { toast } from "sonner";
 import { useSpeech } from "@/hooks/useSpeech";
 import {
@@ -63,6 +65,15 @@ import {
   type InterviewQuestion,
   type InterviewSetup,
 } from "@/lib/domains/mock-interview.domain";
+import { getFacialData } from "@/lib/actions/facial.action";
+import FacialRecognition from "@/components/auth/facial-recognition";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function MockInterviewPage() {
   const [step, setStep] = useState<"setup" | "interview" | "feedback">("setup");
@@ -75,6 +86,13 @@ export default function MockInterviewPage() {
   const { user } = useAuth();
   const [userName, setUserName] = useState<string>("");
   const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [facialVerificationOpen, setFacialVerificationOpen] = useState(false);
+  const [existingFaceDescriptor, setExistingFaceDescriptor] = useState<
+    number[] | null
+  >(null);
+  const [pendingInterviewData, setPendingInterviewData] =
+    useState<InterviewSetup | null>(null);
+  const [isLoadingFacialData, setIsLoadingFacialData] = useState(false);
 
   // Speech synthesis
   const { isSupported, isSpeaking, speak, cancel } = useSpeech();
@@ -96,6 +114,9 @@ export default function MockInterviewPage() {
       experience: "",
     },
   });
+
+  // Get subscription status - must be called before any useEffect that uses it
+  const { isPremium, isLoading } = useSubscription();
 
   // Stop speech when changing questions or steps
   useEffect(() => {
@@ -123,6 +144,27 @@ export default function MockInterviewPage() {
     fetchUserProfile();
   }, [user]);
 
+  // Load facial data for premium users
+  useEffect(() => {
+    async function loadFacialData() {
+      if (!isPremium || !user?.uid) return;
+
+      setIsLoadingFacialData(true);
+      try {
+        const result = await getFacialData(user.uid);
+        if (result.success && result.data) {
+          setExistingFaceDescriptor(result.data);
+        }
+      } catch (error) {
+        console.error("Failed to load facial data", error);
+      } finally {
+        setIsLoadingFacialData(false);
+      }
+    }
+
+    loadFacialData();
+  }, [isPremium, user?.uid]);
+
   const readQuestion = () => {
     if (questions[currentQuestion]?.question) {
       speak(questions[currentQuestion].question);
@@ -130,6 +172,24 @@ export default function MockInterviewPage() {
   };
 
   const startInterview = async (data: InterviewSetup) => {
+    // If premium user, require facial verification first
+    if (isPremium) {
+      if (!existingFaceDescriptor) {
+        toast.error("Facial profile not found. Please complete setup first.");
+        window.location.href = "/setup-facial";
+        return;
+      }
+      // Store the interview data and show verification dialog
+      setPendingInterviewData(data);
+      setFacialVerificationOpen(true);
+      return;
+    }
+
+    // Non-premium users (shouldn't reach here, but handle anyway)
+    await proceedWithInterview(data);
+  };
+
+  const proceedWithInterview = async (data: InterviewSetup) => {
     try {
       setIsProcessing(true);
       // Generate questions based on user details
@@ -144,6 +204,22 @@ export default function MockInterviewPage() {
       console.error(error);
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  const handleFacialVerificationComplete = (
+    _descriptor: number[] | null,
+    success?: boolean
+  ) => {
+    if (success) {
+      setFacialVerificationOpen(false);
+      toast.success("Identity verified. Starting interview...");
+      if (pendingInterviewData) {
+        proceedWithInterview(pendingInterviewData);
+        setPendingInterviewData(null);
+      }
+    } else {
+      toast.error("Facial verification failed. Please try again.");
     }
   };
 
@@ -191,6 +267,19 @@ export default function MockInterviewPage() {
 
       setFeedback(interviewFeedback);
       setStep("feedback");
+
+      // Save interview result to history
+      try {
+        await saveMockInterviewResult(
+          setupForm.getValues(),
+          questionTexts,
+          userResponses.filter(Boolean),
+          interviewFeedback
+        );
+      } catch (saveError) {
+        console.error("Failed to save interview to history:", saveError);
+        // Don't show error to user, just log it
+      }
     } catch (error) {
       toast("Failed to evaluate your responses. Please try again.");
       console.error(error);
@@ -252,8 +341,6 @@ export default function MockInterviewPage() {
       setIsExportingPdf(false);
     }
   };
-
-  const { isPremium, isLoading } = useSubscription();
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
@@ -616,6 +703,35 @@ export default function MockInterviewPage() {
             </Card>
           )}
         </>
+      )}
+
+      {/* Facial Verification Dialog */}
+      {isPremium && existingFaceDescriptor && (
+        <Dialog
+          open={facialVerificationOpen}
+          onOpenChange={setFacialVerificationOpen}
+        >
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>Verify your identity</DialogTitle>
+              <DialogDescription>
+                Please complete a quick facial scan to start your mock
+                interview. This helps us keep your account secure.
+              </DialogDescription>
+            </DialogHeader>
+
+            <FacialRecognition
+              mode="verify"
+              existingFaceDescriptor={existingFaceDescriptor}
+              onComplete={handleFacialVerificationComplete}
+              onCancel={() => {
+                setFacialVerificationOpen(false);
+                setPendingInterviewData(null);
+              }}
+              userName={user?.displayName || user?.email || "User"}
+            />
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

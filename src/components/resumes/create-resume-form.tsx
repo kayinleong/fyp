@@ -60,8 +60,12 @@ export function CreateResumeForm({ userId }: CreateResumeFormProps) {
         oneTimeView: securityOptions.oneTimeView,
         timeLimited: securityOptions.timeLimited,
         passwordProtected: securityOptions.passwordProtected,
-        password: securityOptions.passwordProtected ? securityOptions.password : null,
-        expirationDate: securityOptions.timeLimited ? securityOptions.expirationDate : null,
+        password: securityOptions.passwordProtected
+          ? securityOptions.password
+          : null,
+        expirationDate: securityOptions.timeLimited
+          ? securityOptions.expirationDate
+          : null,
       });
 
       if (result.success) {
@@ -71,7 +75,7 @@ export function CreateResumeForm({ userId }: CreateResumeFormProps) {
       } else {
         toast.error(result.error || "Failed to share resume");
       }
-    } catch (error) {
+    } catch {
       toast.error("An error occurred");
     } finally {
       setIsLoading(false);
@@ -79,10 +83,17 @@ export function CreateResumeForm({ userId }: CreateResumeFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white rounded-xl shadow-sm border border-gray-100 p-8"
+    >
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-blue-600 mb-2">Create Resume Share</h2>
-        <p className="text-gray-600">Upload your PDF and set advanced security options.</p>
+        <h2 className="text-2xl font-bold text-blue-600 mb-2">
+          Create Resume Share
+        </h2>
+        <p className="text-gray-600">
+          Upload your PDF and set advanced security options.
+        </p>
       </div>
 
       <div className="mb-8">
@@ -111,7 +122,9 @@ export function CreateResumeForm({ userId }: CreateResumeFormProps) {
             </div>
             <div className="flex-1 overflow-hidden">
               <p className="font-medium text-sm truncate">{file.name}</p>
-              <p className="text-xs text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+              <p className="text-xs text-gray-500">
+                {(file.size / 1024 / 1024).toFixed(2)} MB
+              </p>
             </div>
             <Button
               type="button"
@@ -127,20 +140,29 @@ export function CreateResumeForm({ userId }: CreateResumeFormProps) {
       </div>
 
       <div className="bg-gray-50/50 rounded-lg p-6 mb-8">
-        <h3 className="font-semibold text-gray-900 mb-6">Advanced Security Options</h3>
-        
+        <h3 className="font-semibold text-gray-900 mb-6">
+          Advanced Security Options
+        </h3>
+
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
                 <Eye className="h-4 w-4" />
               </div>
-              <Label htmlFor="one-time" className="font-medium cursor-pointer">One-time viewing</Label>
+              <Label htmlFor="one-time" className="font-medium cursor-pointer">
+                One-time viewing
+              </Label>
             </div>
             <Switch
               id="one-time"
               checked={securityOptions.oneTimeView}
-              onCheckedChange={(checked) => setSecurityOptions(prev => ({ ...prev, oneTimeView: checked }))}
+              onCheckedChange={(checked) =>
+                setSecurityOptions((prev) => ({
+                  ...prev,
+                  oneTimeView: checked,
+                }))
+              }
             />
           </div>
 
@@ -150,23 +172,43 @@ export function CreateResumeForm({ userId }: CreateResumeFormProps) {
                 <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
                   <Clock className="h-4 w-4" />
                 </div>
-                <Label htmlFor="time-limited" className="font-medium cursor-pointer">Time-limited access</Label>
+                <Label
+                  htmlFor="time-limited"
+                  className="font-medium cursor-pointer"
+                >
+                  Time-limited access
+                </Label>
               </div>
               <Switch
                 id="time-limited"
                 checked={securityOptions.timeLimited}
-                onCheckedChange={(checked) => setSecurityOptions(prev => ({ ...prev, timeLimited: checked }))}
+                onCheckedChange={(checked) =>
+                  setSecurityOptions((prev) => ({
+                    ...prev,
+                    timeLimited: checked,
+                  }))
+                }
               />
             </div>
 
             {securityOptions.timeLimited && (
               <div className="ml-11">
-                <Label htmlFor="expiration-date" className="text-xs text-gray-500 mb-1 block">Expiration Date & Time</Label>
+                <Label
+                  htmlFor="expiration-date"
+                  className="text-xs text-gray-500 mb-1 block"
+                >
+                  Expiration Date & Time
+                </Label>
                 <Input
                   id="expiration-date"
                   type="datetime-local"
                   value={securityOptions.expirationDate}
-                  onChange={(e) => setSecurityOptions(prev => ({ ...prev, expirationDate: e.target.value }))}
+                  onChange={(e) =>
+                    setSecurityOptions((prev) => ({
+                      ...prev,
+                      expirationDate: e.target.value,
+                    }))
+                  }
                   className="max-w-xs"
                   min={new Date().toISOString().slice(0, 16)}
                 />
@@ -180,22 +222,37 @@ export function CreateResumeForm({ userId }: CreateResumeFormProps) {
                 <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
                   <Lock className="h-4 w-4" />
                 </div>
-                <Label htmlFor="password-protected" className="font-medium cursor-pointer">Password protection</Label>
+                <Label
+                  htmlFor="password-protected"
+                  className="font-medium cursor-pointer"
+                >
+                  Password protection
+                </Label>
               </div>
               <Switch
                 id="password-protected"
                 checked={securityOptions.passwordProtected}
-                onCheckedChange={(checked) => setSecurityOptions(prev => ({ ...prev, passwordProtected: checked }))}
+                onCheckedChange={(checked) =>
+                  setSecurityOptions((prev) => ({
+                    ...prev,
+                    passwordProtected: checked,
+                  }))
+                }
               />
             </div>
-            
+
             {securityOptions.passwordProtected && (
               <div className="ml-11">
                 <Input
                   type="password"
                   placeholder="Enter password"
                   value={securityOptions.password}
-                  onChange={(e) => setSecurityOptions(prev => ({ ...prev, password: e.target.value }))}
+                  onChange={(e) =>
+                    setSecurityOptions((prev) => ({
+                      ...prev,
+                      password: e.target.value,
+                    }))
+                  }
                   className="max-w-xs"
                 />
               </div>
@@ -204,7 +261,8 @@ export function CreateResumeForm({ userId }: CreateResumeFormProps) {
         </div>
 
         <div className="mt-6 p-4 bg-gray-100 rounded text-sm text-gray-600">
-          Empower your sharing with one-time view, and password protection, ensure control over access and your information.
+          Empower your sharing with one-time view, and password protection,
+          ensure control over access and your information.
         </div>
       </div>
 
