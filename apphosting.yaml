@@ -34,8 +34,8 @@ env:
   - variable: NEXT_PUBLIC_DEEPFACE_REQUIRED
     value: false
 
-  - variable: NEXT_PUBLIC_DEEPFACE_DETECT_FACE_URL
-    value: https://detect-face-blentyzzyq-uc.a.run.app
+  - variable: NEXT_PUBLIC_DEEPFACE_HEALTH_URL
+    value: https://health-check-blentyzzyq-uc.a.run.app
 
   - variable: NEXT_PUBLIC_DEEPFACE_DETECT_FACE_URL
     value: https://detect-face-blentyzzyq-uc.a.run.app
