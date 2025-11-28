@@ -28,10 +28,10 @@ export default async function JobDetailsPage({ params }: { params: any }) {
   }
 
   // Helper function to format salary range
-  const formatSalary = (min: number, max: number) => {
+  const formatSalary = (min: number, max: number, currency: string = "USD") => {
     const formatter = new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "USD",
+      currency: currency,
       maximumFractionDigits: 0,
     });
 
@@ -126,7 +126,11 @@ export default async function JobDetailsPage({ params }: { params: any }) {
                 <div className="flex items-center">
                   <DollarSign className="h-4 w-4 mr-2 text-blue-500" />
                   <span className="text-slate-700">
-                    {formatSalary(job.minimum_salary, job.maximum_salary)}
+                    {formatSalary(
+                      job.minimum_salary,
+                      job.maximum_salary,
+                      job.currency
+                    )}
                   </span>
                 </div>
                 {job.is_remote && (

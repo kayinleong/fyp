@@ -121,8 +121,8 @@ function JobCard({ job }: { job: Job }) {
           <div className="flex gap-2">
             <Badge variant="outline">{job.type}</Badge>
             <Badge variant="outline">
-              {formatCurrency(job.minimum_salary)} -{" "}
-              {formatCurrency(job.maximum_salary)}
+              {formatCurrency(job.minimum_salary, job.currency)} -{" "}
+              {formatCurrency(job.maximum_salary, job.currency)}
             </Badge>
           </div>
           <div className="flex gap-2">

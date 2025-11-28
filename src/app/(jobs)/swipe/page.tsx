@@ -72,10 +72,10 @@ export default function JobSwipePage() {
   const dragConstraintsRef = useRef(null);
 
   // Format salary for display
-  const formatSalary = (min: number, max: number) => {
+  const formatSalary = (min: number, max: number, currency: string = "USD") => {
     const formatter = new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "USD",
+      currency: currency,
       maximumFractionDigits: 0,
     });
     return `${formatter.format(min)} - ${formatter.format(max)}`;
@@ -440,7 +440,8 @@ export default function JobSwipePage() {
                           <span className="text-slate-600">
                             {formatSalary(
                               currentJob.minimum_salary,
-                              currentJob.maximum_salary
+                              currentJob.maximum_salary,
+                              currentJob.currency
                             )}
                           </span>
                         </div>
