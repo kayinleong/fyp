@@ -39,7 +39,11 @@ import {
   analyzeUserPreferences,
   getAnalysisResult,
 } from "@/lib/actions/job-swipe.action";
-import { saveJob, unsaveJob, isJobSaved, getSavedJobs } from "@/lib/actions/saved-jobs.action";
+import {
+  saveJob,
+  unsaveJob,
+  getSavedJobs,
+} from "@/lib/actions/saved-jobs.action";
 import { Job, JobStatus } from "@/lib/domains/jobs.domain";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
@@ -87,14 +91,15 @@ export default function JobSwipePage() {
       await getUserSwipes(user.uid);
 
       // Then get user's liked, disliked, and saved jobs along with available jobs
-      const [jobsResponse, likedResponse, dislikedResponse, savedJobsResponse] = await Promise.all(
-        [
+      const [jobsResponse, likedResponse, dislikedResponse, savedJobsResponse] =
+        await Promise.all([
           listJobs(100, JobStatus.OPEN),
           getLikedJobs(user.uid),
           getDislikedJobs(user.uid),
-          profile?.role === "GUEST" ? getSavedJobs(user.uid) : Promise.resolve({ savedJobs: [] }),
-        ]
-      );
+          profile?.role === "GUEST"
+            ? getSavedJobs(user.uid)
+            : Promise.resolve({ savedJobs: [] }),
+        ]);
 
       if (jobsResponse.error) {
         toast(jobsResponse.error);
@@ -104,9 +109,10 @@ export default function JobSwipePage() {
       // Store user preferences
       const likedIds = Object.values(likedResponse.jobIds);
       const dislikedIds = Object.values(dislikedResponse.jobIds);
-      const savedIds = profile?.role === "GUEST" 
-        ? savedJobsResponse.savedJobs.map((sj) => sj.job_id)
-        : [];
+      const savedIds =
+        profile?.role === "GUEST"
+          ? savedJobsResponse.savedJobs.map((sj) => sj.job_id)
+          : [];
 
       setLikedJobIds(likedIds);
       setDislikedJobIds(dislikedIds);
@@ -483,7 +489,13 @@ export default function JobSwipePage() {
                     </CardContent>
 
                     <CardFooter className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background to-transparent pt-16 pb-4">
-                      <div className={`flex items-center w-full ${profile?.role === "GUEST" ? "justify-around" : "justify-between"}`}>
+                      <div
+                        className={`flex items-center w-full ${
+                          profile?.role === "GUEST"
+                            ? "justify-around"
+                            : "justify-between"
+                        }`}
+                      >
                         <Button
                           variant="outline"
                           size="lg"
@@ -498,7 +510,7 @@ export default function JobSwipePage() {
                           )}
                           <span className="sr-only">Dislike</span>
                         </Button>
-                        
+
                         {/* Save Job Button - Only for GUEST accounts */}
                         {profile?.role === "GUEST" && (
                           <Button
@@ -513,7 +525,9 @@ export default function JobSwipePage() {
                               e.stopPropagation();
                               handleSaveJob(currentJob.id);
                             }}
-                            disabled={swipeInProgress || savingJobId === currentJob.id}
+                            disabled={
+                              swipeInProgress || savingJobId === currentJob.id
+                            }
                           >
                             {savingJobId === currentJob.id ? (
                               <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
@@ -529,7 +543,7 @@ export default function JobSwipePage() {
                             <span className="sr-only">Save Job</span>
                           </Button>
                         )}
-                        
+
                         <Button
                           variant="outline"
                           size="lg"

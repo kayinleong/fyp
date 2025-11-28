@@ -118,10 +118,8 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
       if (user && jobId) {
         setIsCheckingPending(true);
         try {
-          const { hasPending: pending, error: checkError } = await hasPendingApplication(
-            user.uid,
-            jobId
-          );
+          const { hasPending: pending, error: checkError } =
+            await hasPendingApplication(user.uid, jobId);
           if (checkError) {
             console.error("Error checking pending application:", checkError);
           } else {
@@ -320,8 +318,9 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
             Application Already Submitted
           </AlertTitle>
           <AlertDescription className="text-blue-700">
-            You have already submitted an application for this job. Please wait for the employer's response. 
-            You can view your application status in your applications page.
+            You have already submitted an application for this job. Please wait
+            for the employer&apos;s response. You can view your application
+            status in your applications page.
           </AlertDescription>
         </Alert>
         <Button
