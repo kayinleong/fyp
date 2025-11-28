@@ -104,6 +104,7 @@ export async function createResume(
       filePath: uploadResult.filePath,
       publicUrl: uploadResult.url,
       securityOptions,
+      hasBeenViewed: false,
       created_at: admin.firestore.FieldValue.serverTimestamp(),
       updated_at: admin.firestore.FieldValue.serverTimestamp(),
     };
@@ -164,6 +165,55 @@ export async function getResumeById(
   } catch (error) {
     console.error("Error getting resume:", error);
     return { resume: null, error: "Failed to fetch resume" };
+  }
+}
+
+/**
+ * Get a resume for public view with security checks
+ */
+export async function getPublicResumeById(
+  resumeId: string
+): Promise<{ resume: Resume | null; error?: string }> {
+  try {
+    const { resume, error } = await getResumeById(resumeId);
+
+    if (error || !resume) {
+      return { resume: null, error: error || "Resume not found" };
+    }
+
+    // Check One-Time View
+    if (resume.securityOptions.oneTimeView && resume.hasBeenViewed) {
+      return {
+        resume: null,
+        error:
+          "This resume has already been viewed and is no longer accessible.",
+      };
+    }
+
+    return { resume };
+  } catch (error) {
+    console.error("Error getting public resume:", error);
+    return { resume: null, error: "Failed to fetch resume" };
+  }
+}
+
+/**
+ * Mark a resume as viewed
+ */
+export async function markResumeAsViewed(
+  resumeId: string
+): Promise<ResumeResponse> {
+  try {
+    const db = getDb();
+    await db.collection("Resumes").doc(resumeId).update({
+      hasBeenViewed: true,
+      updated_at: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error marking resume as viewed:", error);
+    return { success: false, error: "Failed to update resume status" };
   }
 }
 

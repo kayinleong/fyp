@@ -4,7 +4,10 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { getResumeById } from "@/lib/actions/resume.action";
+import {
+  getPublicResumeById,
+  markResumeAsViewed,
+} from "@/lib/actions/resume.action";
 import { Resume } from "@/lib/domains/resume.domain";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,7 +49,7 @@ export default function ResumeViewerPage() {
       setIsLoading(true);
       try {
         const { resume: fetchedResume, error: fetchError } =
-          await getResumeById(id);
+          await getPublicResumeById(id);
 
         if (fetchError || !fetchedResume) {
           setError(fetchError || "Resume not found");
@@ -92,7 +95,11 @@ export default function ResumeViewerPage() {
   }, [id]);
 
   const handleOneTimeView = async () => {
-    // Logic for one-time view tracking would go here
+    try {
+      await markResumeAsViewed(id);
+    } catch (error) {
+      console.error("Failed to mark resume as viewed:", error);
+    }
   };
 
   const handlePasswordSubmit = (e: React.FormEvent) => {

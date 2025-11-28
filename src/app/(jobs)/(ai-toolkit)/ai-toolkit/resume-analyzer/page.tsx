@@ -14,11 +14,22 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, FileText, Loader2, Check, AlertCircle } from "lucide-react";
+import {
+  Upload,
+  FileText,
+  Loader2,
+  Check,
+  AlertCircle,
+  Download,
+} from "lucide-react";
 import {
   analyzeResume,
   AnalysisResult,
 } from "@/lib/actions/resume-analyzer.action";
+import {
+  generateResumeAnalysisPdf,
+  ResumeAnalysisPdfData,
+} from "@/lib/utils/pdf-generator";
 import { toast } from "sonner";
 import { useSubscription } from "@/hooks/useSubscription";
 import FeatureLocked from "@/components/subscription/feature-locked";
@@ -48,6 +59,7 @@ export default function ResumeAnalyzerPage() {
     number[] | null
   >(null);
   const [isLoadingFacialData, setIsLoadingFacialData] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -154,6 +166,42 @@ export default function ResumeAnalyzerPage() {
     }
   };
 
+  const exportToPdf = async () => {
+    if (!analysisResults || !user) return;
+
+    setIsExportingPdf(true);
+    try {
+      const pdfData: ResumeAnalysisPdfData = {
+        userInfo: {
+          name: user.displayName || "Anonymous User",
+          email: user.email || "No email provided",
+          userId: user.uid,
+        },
+        analysisData: {
+          score: analysisResults.score,
+          summary: analysisResults.summary,
+          strengths: analysisResults.strengths,
+          improvements: analysisResults.improvements,
+          sectionFeedback: analysisResults.sectionFeedback,
+          date: new Date(),
+        },
+      };
+
+      const doc = generateResumeAnalysisPdf(pdfData);
+      const fileName = `resume-analysis-${
+        new Date().toISOString().split("T")[0]
+      }.pdf`;
+      doc.save(fileName);
+
+      toast.success("PDF exported successfully");
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast.error("Failed to export PDF. Please try again.");
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white py-12">
       <div className="container mx-auto px-4 max-w-3xl">
@@ -199,7 +247,7 @@ export default function ResumeAnalyzerPage() {
 
                 {file ? (
                   <div className="flex flex-col items-center">
-                    <FileText className="h-16 w-16 text-pink-600 mb-4" />
+                    <FileText className="h-16 w-16 text-blue-600 mb-4" />
                     <p className="font-medium mb-1 text-slate-800">
                       {file.name}
                     </p>
@@ -209,14 +257,14 @@ export default function ResumeAnalyzerPage() {
                     <Button
                       variant="outline"
                       onClick={handleUploadClick}
-                      className="border-gray-200 text-pink-600 hover:bg-gray-50"
+                      className="border-gray-200 text-blue-600 hover:bg-gray-50"
                     >
                       Choose a different file
                     </Button>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center">
-                    <Upload className="h-16 w-16 text-pink-600 mb-4" />
+                    <Upload className="h-16 w-16 text-blue-600 mb-4" />
                     <p className="font-medium mb-1 text-slate-800">
                       Drag and drop your resume PDF
                     </p>
@@ -226,7 +274,7 @@ export default function ResumeAnalyzerPage() {
                     <Button
                       variant="outline"
                       onClick={handleUploadClick}
-                      className="border-gray-200 text-pink-600 hover:bg-gray-50"
+                      className="border-gray-200 text-blue-600 hover:bg-gray-50"
                     >
                       Select PDF File
                     </Button>
@@ -240,19 +288,19 @@ export default function ResumeAnalyzerPage() {
                 </p>
                 <ul className="grid grid-cols-2 gap-x-2 gap-y-1">
                   <li className="flex items-center text-sm">
-                    <div className="h-1.5 w-1.5 rounded-full bg-pink-500 mr-2"></div>
+                    <div className="h-1.5 w-1.5 rounded-full bg-blue-500 mr-2"></div>
                     Content and formatting
                   </li>
                   <li className="flex items-center text-sm">
-                    <div className="h-1.5 w-1.5 rounded-full bg-pink-500 mr-2"></div>
+                    <div className="h-1.5 w-1.5 rounded-full bg-blue-500 mr-2"></div>
                     ATS compatibility
                   </li>
                   <li className="flex items-center text-sm">
-                    <div className="h-1.5 w-1.5 rounded-full bg-pink-500 mr-2"></div>
+                    <div className="h-1.5 w-1.5 rounded-full bg-blue-500 mr-2"></div>
                     Keyword optimization
                   </li>
                   <li className="flex items-center text-sm">
-                    <div className="h-1.5 w-1.5 rounded-full bg-pink-500 mr-2"></div>
+                    <div className="h-1.5 w-1.5 rounded-full bg-blue-500 mr-2"></div>
                     Improvement areas
                   </li>
                 </ul>
@@ -262,7 +310,7 @@ export default function ResumeAnalyzerPage() {
               <Button
                 onClick={handleAnalyze}
                 disabled={!file || isUploading || isAnalyzing}
-                className="w-full bg-pink-600 hover:bg-pink-700 py-6 rounded-xl"
+                className="w-full bg-blue-600 hover:bg-blue-700 py-6 rounded-xl"
               >
                 {isUploading ? (
                   <>
@@ -289,14 +337,28 @@ export default function ResumeAnalyzerPage() {
                     Resume Analysis Results
                   </CardTitle>
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl font-bold text-pink-600">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={exportToPdf}
+                      disabled={isExportingPdf}
+                      className="border-blue-200 text-blue-600 hover:bg-blue-50 mr-2"
+                    >
+                      {isExportingPdf ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Download className="h-4 w-4 mr-2" />
+                      )}
+                      Export PDF
+                    </Button>
+                    <span className="text-2xl font-bold text-blue-600">
                       {analysisResults?.score}/100
                     </span>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="pt-6">
-                <div className="mb-6 p-4 bg-pink-50 rounded-xl">
+                <div className="mb-6 p-4 bg-blue-50 rounded-xl">
                   <p className="text-slate-700">{analysisResults?.summary}</p>
                 </div>
 
@@ -304,19 +366,19 @@ export default function ResumeAnalyzerPage() {
                   <TabsList className="mb-4 bg-gray-100 p-1 rounded-lg">
                     <TabsTrigger
                       value="overview"
-                      className="data-[state=active]:bg-white data-[state=active]:text-pink-600 data-[state=active]:shadow-sm rounded-md"
+                      className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm rounded-md"
                     >
                       Overview
                     </TabsTrigger>
                     <TabsTrigger
                       value="sections"
-                      className="data-[state=active]:bg-white data-[state=active]:text-pink-600 data-[state=active]:shadow-sm rounded-md"
+                      className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm rounded-md"
                     >
                       Section Analysis
                     </TabsTrigger>
                     <TabsTrigger
                       value="keywords"
-                      className="data-[state=active]:bg-white data-[state=active]:text-pink-600 data-[state=active]:shadow-sm rounded-md"
+                      className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm rounded-md"
                     >
                       Keyword Analysis
                     </TabsTrigger>
@@ -387,7 +449,7 @@ export default function ResumeAnalyzerPage() {
                         This section provides insights about keywords in your
                         resume based on the AI analysis.
                       </p>
-                      <div className="p-4 bg-pink-50 rounded-xl">
+                      <div className="p-4 bg-blue-50 rounded-xl">
                         <p className="text-slate-700">
                           Based on your target role and industry, consider
                           adding more relevant keywords to improve ATS
@@ -402,7 +464,7 @@ export default function ResumeAnalyzerPage() {
               <CardFooter className="flex flex-col sm:flex-row gap-3 w-full">
                 <Button
                   onClick={resetAnalysis}
-                  className="w-full bg-pink-600 hover:bg-pink-700 rounded-xl py-6"
+                  className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl py-6"
                 >
                   Analyze Another Resume
                 </Button>
