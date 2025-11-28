@@ -1,7 +1,6 @@
 "use server";
 
 import nodemailer from "nodemailer";
-import { ApplicationStatus } from "@/lib/domains/applications.domain";
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,

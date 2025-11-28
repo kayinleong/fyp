@@ -46,6 +46,21 @@ env:
   - variable: NEXT_PUBLIC_DEEPFACE_MODELS_INFO_URL
     value: https://models-info-blentyzzyq-uc.a.run.app
 
+  - variable: SMTP_FROM
+    value: '"noreply @ RabbitJobs" <kyleong-wm22@student.tarc.edu.my>'
+
+  - variable: SMTP_USER
+    secret: SMTP_USER
+
+  - variable: SMTP_PASS
+    secret: SMTP_PASS
+
+  - variable: SMTP_HOST
+    secret: SMTP_HOST
+
+  - variable: SMTP_PORT
+    secret: SMTP_PORT
+
   - variable: STRIPE_SECRET_KEY
     secret: STRIPE_SECRET_KEY
 

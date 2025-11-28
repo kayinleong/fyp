@@ -55,7 +55,7 @@ export function getEmailTemplate(
     ];
 
     const stepHtml = steps
-      .map((step, index) => {
+      .map((step) => {
         const color = step.active ? "#0f172a" : "#cbd5e1";
         const weight = step.active ? "bold" : "normal";
         return `
