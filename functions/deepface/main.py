@@ -25,9 +25,7 @@ initialize_app()
 # CORS configuration for allowed origins
 CORS_CONFIG = options.CorsOptions(
     cors_origins=[
-        r"localhost:3000",
         r"http://localhost:3000",
-        r"https://fyp-rabbitjob--kl2pen\.asia-southeast1\.hosted\.app",
         r"https://fyp--kl2pen\.asia-southeast1\.hosted\.app"
     ],
     cors_methods=["get", "post", "options"],
@@ -141,31 +139,40 @@ def initialize_deepface():
         print("Initializing DeepFace...")
 
         # Set DeepFace home directory structure
-        # DeepFace expects models to be in DEEPFACE_HOME/.deepface/weights/
+        # We use /tmp because it's the only writable directory in Firebase Functions
         base_dir = os.path.dirname(__file__)
-        deepface_home = base_dir
-        weights_dir = os.path.join(base_dir, '.deepface', 'weights')
+        deepface_home = "/tmp"
+        weights_dir = os.path.join(deepface_home, '.deepface', 'weights')
         models_source_dir = os.path.join(base_dir, 'models')
         
         # Create the expected directory structure
         os.makedirs(weights_dir, exist_ok=True)
         
-        # Set DeepFace home directory
+        # Set DeepFace home directory environment variable
         os.environ['DEEPFACE_HOME'] = deepface_home
         print(f"DeepFace home directory set to: {deepface_home}")
         print(f"DeepFace weights directory: {weights_dir}")
         
-        # Copy models from our models directory to the expected weights directory
-        # if they don't already exist there
+        # Link models from our models directory to the expected weights directory
+        # Symlinking is faster than copying and saves space
         if os.path.exists(models_source_dir):
             for model_file in os.listdir(models_source_dir):
                 source_path = os.path.join(models_source_dir, model_file)
                 target_path = os.path.join(weights_dir, model_file)
                 
-                if os.path.isfile(source_path) and not os.path.exists(target_path):
-                    import shutil
-                    shutil.copy2(source_path, target_path)
-                    print(f"Copied model: {model_file}")
+                if os.path.isfile(source_path):
+                    if not os.path.exists(target_path):
+                        try:
+                            os.symlink(source_path, target_path)
+                            print(f"Symlinked model: {model_file}")
+                        except OSError as e:
+                            # Fallback to copy if symlink fails (e.g. cross-device link)
+                            import shutil
+                            print(f"Symlink failed ({e}), falling back to copy for: {model_file}")
+                            shutil.copy2(source_path, target_path)
+                            print(f"Copied model: {model_file}")
+                    else:
+                        print(f"Model already exists in weights: {model_file}")
         
         print(f"Model files available in weights directory: {os.listdir(weights_dir) if os.path.exists(weights_dir) else 'Directory not found'}")
 
@@ -242,7 +249,7 @@ def decode_base64_image(base64_string):
         return None
 
 
-@https_fn.on_request(cors=CORS_CONFIG, max_instances=3, timeout_sec=540, memory=2048)
+@https_fn.on_request(cors=CORS_CONFIG, max_instances=3, memory=2048)
 def detect_face(req: https_fn.Request) -> https_fn.Response:
     """Detect face and extract embeddings"""
     try:
@@ -422,7 +429,7 @@ def detect_face(req: https_fn.Request) -> https_fn.Response:
         )
 
 
-@https_fn.on_request(cors=CORS_CONFIG, max_instances=3, timeout_sec=300, memory=2048)
+@https_fn.on_request(cors=CORS_CONFIG, max_instances=3, memory=2048)
 def verify_faces(req: https_fn.Request) -> https_fn.Response:
     """Compare two face embeddings"""
     try:
@@ -540,7 +547,7 @@ def verify_faces(req: https_fn.Request) -> https_fn.Response:
         )
 
 
-@https_fn.on_request(cors=CORS_CONFIG, max_instances=2, memory=2048)
+@https_fn.on_request(cors=CORS_CONFIG, max_instances=3, memory=2048)
 def health_check(req: https_fn.Request) -> https_fn.Response:
     """Health check endpoint with FaceNet model verification"""
     try:
@@ -596,7 +603,7 @@ def health_check(req: https_fn.Request) -> https_fn.Response:
         )
 
 
-@https_fn.on_request(cors=CORS_CONFIG, max_instances=2, memory=2048)
+@https_fn.on_request(cors=CORS_CONFIG, max_instances=3, memory=2048)
 def models_info(req: https_fn.Request) -> https_fn.Response:
     """Get information about DeepFace service"""
     try:

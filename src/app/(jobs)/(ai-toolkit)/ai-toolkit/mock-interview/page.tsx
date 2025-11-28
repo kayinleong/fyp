@@ -224,15 +224,12 @@ export default function MockInterviewPage() {
   };
 
   const toggleRecording = () => {
-    console.log("Toggle recording:", isRecording, isListening);
     if (isListening) {
       // Stop recording
       stopListening();
       setIsRecording(false);
 
       // Save transcript to responses
-      console.log("user response:", ...userResponses);
-      console.log("Transcript:", transcript);
       setUserResponses([...userResponses, transcript]);
 
       // Move to next question or finish

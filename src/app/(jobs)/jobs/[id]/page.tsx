@@ -14,6 +14,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import ApplicationForm from "@/components/applications/application-form";
+import SaveJobButton from "@/components/jobs/save-job-button";
 import { getJobById } from "@/lib/actions/job.action";
 import { notFound } from "next/navigation";
 
@@ -238,7 +239,8 @@ export default async function JobDetailsPage({ params }: { params: any }) {
                 </CardTitle>
               </div>
             </CardHeader>
-            <CardContent className="pt-6">
+            <CardContent className="pt-6 space-y-4">
+              <SaveJobButton jobId={(await params).id} className="w-full" />
               <ApplicationForm jobId={(await params).id} />
             </CardContent>
           </Card>
