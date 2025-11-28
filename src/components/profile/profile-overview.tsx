@@ -10,6 +10,7 @@ import { getProfileById } from "@/lib/actions/profile.action";
 import { getUserActiveSubscription } from "@/lib/actions/subscription.action";
 import { SubscriptionPlan } from "@/lib/domains/subscription.domain";
 import { Profile } from "@/lib/domains/profile.domain";
+import SavedJobsList from "@/components/jobs/saved-jobs-list";
 import Link from "next/link";
 
 interface ProfileOverviewProps {
@@ -185,4 +186,8 @@ export default function ProfileOverview({ userId }: ProfileOverviewProps) {
       </CardContent>
     </Card>
   );
+}
+
+export function ProfileSavedJobs({ userId }: { userId: string }) {
+  return <SavedJobsList userId={userId} />;
 }

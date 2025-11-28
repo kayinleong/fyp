@@ -80,6 +80,17 @@ export function getEmailTemplate(
   const signature = `<p>Best regards,<br>${companyName}</p>`;
 
   switch (status) {
+    case ApplicationStatus.PENDING:
+      subject = `Application Received: ${jobTitle}`;
+      body = `
+        <p>Dear ${candidateName},</p>
+        <p>Thank you for applying for the position of <strong>${jobTitle}</strong> at <strong>${companyName}</strong>.</p>
+        <p>We have received your application and will review it shortly. If your qualifications match our requirements, we will contact you to schedule an interview.</p>
+        <p>You can track the status of your application in your dashboard.</p>
+        ${signature}
+      `;
+      break;
+
     case ApplicationStatus.INTERVIEW:
       subject = `Interview Invitation: ${jobTitle}`;
       body = `
@@ -135,6 +146,66 @@ export function getEmailTemplate(
     <div style="${baseStyles}">
       ${header}
       ${getStatusBar()}
+      <div style="padding: 20px 0;">
+        ${body}
+      </div>
+      ${footer}
+    </div>
+  `;
+
+  return { subject, html };
+}
+
+export function getSubscriptionUpgradeTemplate(
+  userName: string,
+  planName: string,
+  endDate: Date
+): { subject: string; html: string } {
+  const baseStyles = `
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+  `;
+
+  const header = `
+    <div style="background-color: #f8f9fa; padding: 20px; text-align: center; border-radius: 5px;">
+      <h2 style="color: #0f172a; margin: 0;">Welcome to Premium!</h2>
+    </div>
+  `;
+
+  const footer = `
+    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666; text-align: center;">
+      <p>This is an automated message. Please do not reply to this email.</p>
+    </div>
+  `;
+
+  const formattedDate = endDate.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  const subject = `Welcome to ${planName}!`;
+  const body = `
+    <p>Dear ${userName},</p>
+    <p>Congratulations! You have successfully upgraded to the <strong>${planName}</strong>.</p>
+    <p>You now have access to exclusive AI features including:</p>
+    <ul>
+      <li>AI Mock Interviews</li>
+      <li>Resume Analysis</li>
+      <li>And more!</li>
+    </ul>
+    <p>Your subscription is active until <strong>${formattedDate}</strong>.</p>
+    <p>Thank you for choosing us to help you in your career journey.</p>
+    <p>Best regards,<br>RabbitJobs</p>
+  `;
+
+  const html = `
+    <div style="${baseStyles}">
+      ${header}
       <div style="padding: 20px 0;">
         ${body}
       </div>

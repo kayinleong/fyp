@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { validateSession } from "@/lib/actions/auth.action";
+import { getProfileById } from "@/lib/actions/profile.action";
 
-import ProfileOverview from "@/components/profile/profile-overview";
+import ProfileOverview, { ProfileSavedJobs } from "@/components/profile/profile-overview";
 
 export const metadata: Metadata = {
   title: "Profile | RabbitJob",
@@ -18,6 +19,10 @@ export default async function ProfilePage() {
     redirect("/login");
   }
 
+  // Get user profile to check account type
+  const { profile } = await getProfileById(user.uid);
+  const isJobSeeker = profile?.role === "GUEST";
+
   return (
     <div className="mx-auto container max-w-4xl py-10 p-4">
       <div className="flex flex-col space-y-8">
@@ -29,6 +34,9 @@ export default async function ProfilePage() {
         </div>
 
         <ProfileOverview userId={user.uid} />
+
+        {/* Show saved jobs only for job seekers (GUEST accounts) */}
+        {isJobSeeker && <ProfileSavedJobs userId={user.uid} />}
       </div>
     </div>
   );
