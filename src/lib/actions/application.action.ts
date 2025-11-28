@@ -41,30 +41,33 @@ export interface ApplicationFilterParams {
 /**
  * Creates a new job application in Firestore
  */
-export async function createApplication(application: Application): Promise<ApplicationResponse> {
-    try {
-        // Check if user already has a pending application for this job
-        const { hasPending, error: checkError } = await hasPendingApplication(
-            application.user_id,
-            application.job_id
-        );
+export async function createApplication(
+  application: Application
+): Promise<ApplicationResponse> {
+  try {
+    // Check if user already has a pending application for this job
+    const { hasPending, error: checkError } = await hasPendingApplication(
+      application.user_id,
+      application.job_id
+    );
 
-        if (checkError) {
-            return {
-                success: false,
-                error: checkError
-            };
-        }
+    if (checkError) {
+      return {
+        success: false,
+        error: checkError,
+      };
+    }
 
-        if (hasPending) {
-            return {
-                success: false,
-                error: "You have already submitted an application for this job. Please wait for the employer's response."
-            };
-        }
+    if (hasPending) {
+      return {
+        success: false,
+        error:
+          "You have already submitted an application for this job. Please wait for the employer's response.",
+      };
+    }
 
-        const db = getDb();
-        const applicationsCollection = 'Applications';
+    const db = getDb();
+    const applicationsCollection = "Applications";
 
     // Create a new document with auto-generated ID
     const applicationRef = db.collection(applicationsCollection).doc();
@@ -79,6 +82,29 @@ export async function createApplication(application: Application): Promise<Appli
 
     // Create the application document
     await applicationRef.set(applicationWithMetadata);
+
+    // Send email notification
+    try {
+      const { job } = await getJobById(application.job_id);
+      const userRecord = await admin.auth().getUser(application.user_id);
+
+      if (job && userRecord && userRecord.email) {
+        const { subject, html } = getEmailTemplate(
+          ApplicationStatus.PENDING,
+          job.title,
+          userRecord.displayName || "Candidate",
+          job.company_name || "Hiring Team"
+        );
+
+        await sendEmail({
+          to: userRecord.email,
+          subject,
+          html,
+        });
+      }
+    } catch (emailError) {
+      console.error("Failed to send application received email:", emailError);
+    }
 
     return {
       success: true,
@@ -408,47 +434,47 @@ export async function hasUserAppliedToJob(
       return { hasApplied: false, error };
     }
 
-        return { hasApplied: applications.length > 0 };
-    } catch (error) {
-        console.error("Error checking if user applied to job:", error);
-        return {
-            hasApplied: false,
-            error: error instanceof Error ? error.message : "Unknown error occurred"
-        };
-    }
+    return { hasApplied: applications.length > 0 };
+  } catch (error) {
+    console.error("Error checking if user applied to job:", error);
+    return {
+      hasApplied: false,
+      error: error instanceof Error ? error.message : "Unknown error occurred",
+    };
+  }
 }
 
 /**
  * Check if a user has a pending application for a job
  */
 export async function hasPendingApplication(
-    userId: string,
-    jobId: string
+  userId: string,
+  jobId: string
 ): Promise<{ hasPending: boolean; application?: Application; error?: string }> {
-    try {
-        const { applications, error } = await listApplications({
-            userId,
-            jobId,
-            status: ApplicationStatus.PENDING,
-            limit: 1
-        });
+  try {
+    const { applications, error } = await listApplications({
+      userId,
+      jobId,
+      status: ApplicationStatus.PENDING,
+      limit: 1,
+    });
 
-        if (error) {
-            return { hasPending: false, error };
-        }
-
-        if (applications.length > 0) {
-            return { hasPending: true, application: applications[0] };
-        }
-
-        return { hasPending: false };
-    } catch (error) {
-        console.error("Error checking for pending application:", error);
-        return {
-            hasPending: false,
-            error: error instanceof Error ? error.message : "Unknown error occurred"
-        };
+    if (error) {
+      return { hasPending: false, error };
     }
+
+    if (applications.length > 0) {
+      return { hasPending: true, application: applications[0] };
+    }
+
+    return { hasPending: false };
+  } catch (error) {
+    console.error("Error checking for pending application:", error);
+    return {
+      hasPending: false,
+      error: error instanceof Error ? error.message : "Unknown error occurred",
+    };
+  }
 }
 
 /**
