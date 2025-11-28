@@ -20,6 +20,7 @@ import { useAuth } from "@/lib/contexts/auth-context";
 import {
   createApplication,
   uploadResumeFile,
+  hasPendingApplication,
 } from "@/lib/actions/application.action";
 import {
   Application,
@@ -59,6 +60,8 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
   // Status states
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [hasPending, setHasPending] = useState(false);
+  const [isCheckingPending, setIsCheckingPending] = useState(true);
 
   // Fetch user profile when user is available
   useEffect(() => {
@@ -105,6 +108,32 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
 
     fetchResumes();
   }, [user]);
+
+  // Check if user has a pending application for this job
+  useEffect(() => {
+    async function checkPendingApplication() {
+      if (user && jobId) {
+        setIsCheckingPending(true);
+        try {
+          const { hasPending: pending, error: checkError } = await hasPendingApplication(
+            user.uid,
+            jobId
+          );
+          if (checkError) {
+            console.error("Error checking pending application:", checkError);
+          } else {
+            setHasPending(pending);
+          }
+        } catch (err) {
+          console.error("Error checking pending application:", err);
+        } finally {
+          setIsCheckingPending(false);
+        }
+      }
+    }
+
+    checkPendingApplication();
+  }, [user, jobId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -273,6 +302,31 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
     );
   }
 
+  // Show pending application message
+  if (!isCheckingPending && hasPending) {
+    return (
+      <div className="space-y-4">
+        <Alert className="bg-blue-50 border-blue-200">
+          <AlertCircle className="h-4 w-4 text-blue-600" />
+          <AlertTitle className="text-blue-800">
+            Application Already Submitted
+          </AlertTitle>
+          <AlertDescription className="text-blue-700">
+            You have already submitted an application for this job. Please wait for the employer's response. 
+            You can view your application status in your applications page.
+          </AlertDescription>
+        </Alert>
+        <Button
+          className="w-full"
+          variant="outline"
+          onClick={() => router.push("/applications")}
+        >
+          View My Applications
+        </Button>
+      </div>
+    );
+  }
+
   // Show success message
   if (success) {
     return (
@@ -289,12 +343,12 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
     );
   }
 
-  // Show loading indicator while fetching profile
-  if (isLoadingProfile) {
+  // Show loading indicator while fetching profile or checking pending status
+  if (isLoadingProfile || isCheckingPending) {
     return (
       <div className="flex justify-center items-center py-8">
         <Loader2 className="h-6 w-6 animate-spin text-primary" />
-        <span className="ml-2">Loading your profile...</span>
+        <span className="ml-2">Loading...</span>
       </div>
     );
   }

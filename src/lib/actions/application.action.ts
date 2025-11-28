@@ -37,6 +37,26 @@ export interface ApplicationFilterParams {
  */
 export async function createApplication(application: Application): Promise<ApplicationResponse> {
     try {
+        // Check if user already has a pending application for this job
+        const { hasPending, error: checkError } = await hasPendingApplication(
+            application.user_id,
+            application.job_id
+        );
+
+        if (checkError) {
+            return {
+                success: false,
+                error: checkError
+            };
+        }
+
+        if (hasPending) {
+            return {
+                success: false,
+                error: "You have already submitted an application for this job. Please wait for the employer's response."
+            };
+        }
+
         const db = getDb();
         const applicationsCollection = 'Applications';
 
@@ -335,6 +355,39 @@ export async function hasUserAppliedToJob(
         console.error("Error checking if user applied to job:", error);
         return {
             hasApplied: false,
+            error: error instanceof Error ? error.message : "Unknown error occurred"
+        };
+    }
+}
+
+/**
+ * Check if a user has a pending application for a job
+ */
+export async function hasPendingApplication(
+    userId: string,
+    jobId: string
+): Promise<{ hasPending: boolean; application?: Application; error?: string }> {
+    try {
+        const { applications, error } = await listApplications({
+            userId,
+            jobId,
+            status: ApplicationStatus.PENDING,
+            limit: 1
+        });
+
+        if (error) {
+            return { hasPending: false, error };
+        }
+
+        if (applications.length > 0) {
+            return { hasPending: true, application: applications[0] };
+        }
+
+        return { hasPending: false };
+    } catch (error) {
+        console.error("Error checking for pending application:", error);
+        return {
+            hasPending: false,
             error: error instanceof Error ? error.message : "Unknown error occurred"
         };
     }

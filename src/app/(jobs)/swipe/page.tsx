@@ -19,6 +19,7 @@ import {
   Briefcase,
   Loader2,
   Sparkles,
+  Heart,
 } from "lucide-react";
 import {
   motion,
@@ -38,6 +39,7 @@ import {
   analyzeUserPreferences,
   getAnalysisResult,
 } from "@/lib/actions/job-swipe.action";
+import { saveJob, unsaveJob, isJobSaved, getSavedJobs } from "@/lib/actions/saved-jobs.action";
 import { Job, JobStatus } from "@/lib/domains/jobs.domain";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
@@ -51,6 +53,8 @@ export default function JobSwipePage() {
   const [swipeInProgress, setSwipeInProgress] = useState(false);
   const [likedJobIds, setLikedJobIds] = useState<string[]>([]);
   const [dislikedJobIds, setDislikedJobIds] = useState<string[]>([]);
+  const [savedJobIds, setSavedJobIds] = useState<string[]>([]);
+  const [savingJobId, setSavingJobId] = useState<string | null>(null);
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
   const [loadingAnalysis, setLoadingAnalysis] = useState(false); // Add loading state for analysis
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null); // Ref to store the debounce timeout
@@ -82,12 +86,13 @@ export default function JobSwipePage() {
       // First ensure the user has a swipe record
       await getUserSwipes(user.uid);
 
-      // Then get user's liked and disliked jobs along with available jobs
-      const [jobsResponse, likedResponse, dislikedResponse] = await Promise.all(
+      // Then get user's liked, disliked, and saved jobs along with available jobs
+      const [jobsResponse, likedResponse, dislikedResponse, savedJobsResponse] = await Promise.all(
         [
           listJobs(100, JobStatus.OPEN),
           getLikedJobs(user.uid),
           getDislikedJobs(user.uid),
+          profile?.role === "GUEST" ? getSavedJobs(user.uid) : Promise.resolve({ savedJobs: [] }),
         ]
       );
 
@@ -99,9 +104,13 @@ export default function JobSwipePage() {
       // Store user preferences
       const likedIds = Object.values(likedResponse.jobIds);
       const dislikedIds = Object.values(dislikedResponse.jobIds);
+      const savedIds = profile?.role === "GUEST" 
+        ? savedJobsResponse.savedJobs.map((sj) => sj.job_id)
+        : [];
 
       setLikedJobIds(likedIds);
       setDislikedJobIds(dislikedIds);
+      setSavedJobIds(savedIds);
 
       // Filter out jobs the user has already interacted with
       const allJobIds = new Set([...likedIds, ...dislikedIds]);
@@ -269,6 +278,38 @@ export default function JobSwipePage() {
 
   const handleRefresh = () => {
     fetchJobsAndInitSwipes();
+  };
+
+  const handleSaveJob = async (jobId: string) => {
+    if (!user || profile?.role !== "GUEST" || savingJobId) return;
+
+    const isCurrentlySaved = savedJobIds.includes(jobId);
+    setSavingJobId(jobId);
+
+    try {
+      if (isCurrentlySaved) {
+        const result = await unsaveJob(jobId);
+        if (result.success) {
+          setSavedJobIds((prev) => prev.filter((id) => id !== jobId));
+          toast.success("Job removed from saved jobs");
+        } else {
+          toast.error(result.error || "Failed to unsave job");
+        }
+      } else {
+        const result = await saveJob(jobId);
+        if (result.success) {
+          setSavedJobIds((prev) => [...prev, jobId]);
+          toast.success("Job saved successfully");
+        } else {
+          toast.error(result.error || "Failed to save job");
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling save status:", error);
+      toast.error("An error occurred");
+    } finally {
+      setSavingJobId(null);
+    }
   };
 
   // Loading state
@@ -442,7 +483,7 @@ export default function JobSwipePage() {
                     </CardContent>
 
                     <CardFooter className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background to-transparent pt-16 pb-4">
-                      <div className="flex justify-between w-full">
+                      <div className={`flex items-center w-full ${profile?.role === "GUEST" ? "justify-around" : "justify-between"}`}>
                         <Button
                           variant="outline"
                           size="lg"
@@ -457,6 +498,38 @@ export default function JobSwipePage() {
                           )}
                           <span className="sr-only">Dislike</span>
                         </Button>
+                        
+                        {/* Save Job Button - Only for GUEST accounts */}
+                        {profile?.role === "GUEST" && (
+                          <Button
+                            variant="outline"
+                            size="lg"
+                            className={`rounded-full h-14 w-14 bg-white dark:bg-gray-800 border-blue-200 hover:bg-blue-50 transition-colors ${
+                              savedJobIds.includes(currentJob.id)
+                                ? "bg-red-50 border-red-300 hover:bg-red-100"
+                                : ""
+                            }`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSaveJob(currentJob.id);
+                            }}
+                            disabled={swipeInProgress || savingJobId === currentJob.id}
+                          >
+                            {savingJobId === currentJob.id ? (
+                              <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                            ) : (
+                              <Heart
+                                className={`h-6 w-6 transition-all ${
+                                  savedJobIds.includes(currentJob.id)
+                                    ? "text-red-500 fill-red-500"
+                                    : "text-gray-500"
+                                }`}
+                              />
+                            )}
+                            <span className="sr-only">Save Job</span>
+                          </Button>
+                        )}
+                        
                         <Button
                           variant="outline"
                           size="lg"
