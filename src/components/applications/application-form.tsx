@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import type React from "react";
@@ -50,9 +51,11 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
   const [additionalInfo, setAdditionalInfo] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
-  
+
   // Resume selection state
-  const [resumeOption, setResumeOption] = useState<"upload" | "shared">("upload");
+  const [resumeOption, setResumeOption] = useState<"upload" | "shared">(
+    "upload"
+  );
   const [sharedResumes, setSharedResumes] = useState<Resume[]>([]);
   const [selectedResumeId, setSelectedResumeId] = useState<string>("");
   const [isLoadingResumes, setIsLoadingResumes] = useState(false);
@@ -174,7 +177,7 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
 
       // Upload resume to server which will handle Firebase Storage upload
       let resumeUrl = "";
-      
+
       if (resumeOption === "upload") {
         if (resumeFile) {
           try {
@@ -219,7 +222,9 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
         }
       } else {
         // Use shared resume URL
-        const selectedResume = sharedResumes.find(r => r.id === selectedResumeId);
+        const selectedResume = sharedResumes.find(
+          (r) => r.id === selectedResumeId
+        );
         if (selectedResume) {
           resumeUrl = selectedResume.publicUrl;
         } else {
@@ -257,7 +262,10 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
         user_id: user.uid,
         phone_number: phone,
         year_of_experience: yearsOfExperience,
-        resume_path: resumeOption === "shared" ? `/resumes/view/${selectedResumeId}` : resumeUrl,
+        resume_path:
+          resumeOption === "shared"
+            ? `/resumes/view/${selectedResumeId}`
+            : resumeUrl,
         resume_id: resumeOption === "shared" ? selectedResumeId : "",
         additional_information: additionalInfo,
         status: ApplicationStatus.PENDING,
@@ -419,27 +427,40 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
 
       <div className="space-y-3">
         <Label>Resume</Label>
-        
+
         {sharedResumes.length > 0 && (
-          <RadioGroup 
-            value={resumeOption} 
+          <RadioGroup
+            value={resumeOption}
             onValueChange={(val) => setResumeOption(val as "upload" | "shared")}
             className="flex gap-4 mb-4"
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="shared" id="option-shared" />
-              <Label htmlFor="option-shared" className="cursor-pointer font-normal">Select from Shared Resumes</Label>
+              <Label
+                htmlFor="option-shared"
+                className="cursor-pointer font-normal"
+              >
+                Select from Shared Resumes
+              </Label>
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="upload" id="option-upload" />
-              <Label htmlFor="option-upload" className="cursor-pointer font-normal">Upload New Resume</Label>
+              <Label
+                htmlFor="option-upload"
+                className="cursor-pointer font-normal"
+              >
+                Upload New Resume
+              </Label>
             </div>
           </RadioGroup>
         )}
 
         {resumeOption === "shared" && sharedResumes.length > 0 ? (
           <div className="space-y-2">
-            <Select value={selectedResumeId} onValueChange={setSelectedResumeId}>
+            <Select
+              value={selectedResumeId}
+              onValueChange={setSelectedResumeId}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select a resume" />
               </SelectTrigger>

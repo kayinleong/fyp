@@ -31,6 +31,9 @@ env:
   - variable: NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
     value: G-DFGK6KQW62
 
+  - variable: NEXT_PUBLIC_DEEPFACE_REQUIRED
+    value: false
+
   - variable: NEXT_PUBLIC_DEEPFACE_HEALTH_URL
     value: https://health-check-blentyzzyq-uc.a.run.app
 
@@ -42,6 +45,12 @@ env:
 
   - variable: NEXT_PUBLIC_DEEPFACE_MODELS_INFO_URL
     value: https://models-info-blentyzzyq-uc.a.run.app
+
+  - variable: STRIPE_SECRET_KEY
+    secret: STRIPE_SECRET_KEY
+
+  - variable: STRIPE_PUBLISHABLE_KEY
+    secret: STRIPE_PUBLISHABLE_KEY
 
   - variable: GEMINI_API_KEY
     secret: GEMINI_API_KEY

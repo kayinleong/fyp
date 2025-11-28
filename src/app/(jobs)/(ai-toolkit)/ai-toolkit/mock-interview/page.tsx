@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -174,9 +175,7 @@ export default function MockInterviewPage() {
     // If premium user, require facial verification first
     if (isPremium) {
       if (!existingFaceDescriptor) {
-        toast.error(
-          "Facial profile not found. Please complete setup first."
-        );
+        toast.error("Facial profile not found. Please complete setup first.");
         window.location.href = "/setup-facial";
         return;
       }
@@ -225,15 +224,12 @@ export default function MockInterviewPage() {
   };
 
   const toggleRecording = () => {
-    console.log("Toggle recording:", isRecording, isListening);
     if (isListening) {
       // Stop recording
       stopListening();
       setIsRecording(false);
 
       // Save transcript to responses
-      console.log("user response:", ...userResponses);
-      console.log("Transcript:", transcript);
       setUserResponses([...userResponses, transcript]);
 
       // Move to next question or finish
@@ -716,8 +712,8 @@ export default function MockInterviewPage() {
             <DialogHeader>
               <DialogTitle>Verify your identity</DialogTitle>
               <DialogDescription>
-                Please complete a quick facial scan to start your mock interview.
-                This helps us keep your account secure.
+                Please complete a quick facial scan to start your mock
+                interview. This helps us keep your account secure.
               </DialogDescription>
             </DialogHeader>
 

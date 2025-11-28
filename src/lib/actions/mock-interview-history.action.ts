@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
 import admin from "@/lib/firebase/server";
@@ -103,7 +104,7 @@ export async function getMockInterviewHistory() {
         console.warn(
           "Composite index not found, using fallback query. Please create an index for MockInterviews collection with fields: userId (Ascending), createdAt (Descending)"
         );
-        
+
         // Fallback: get all user's interviews and sort in memory
         snapshot = await db
           .collection("MockInterviews")
@@ -195,4 +196,3 @@ export async function getMockInterviewById(id: string) {
     throw new Error("Failed to fetch mock interview");
   }
 }
-
