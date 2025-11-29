@@ -47,6 +47,13 @@ import {
 import { Job, JobStatus } from "@/lib/domains/jobs.domain";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import SwipeSettingsPanel from "@/components/jobs/swipe-settings-panel";
+import {
+  SwipeAISettings,
+  PriorityLevel,
+  CATEGORY_CONFIG,
+} from "@/lib/domains/swipe-settings.domain";
+import { getSwipeAISettings } from "@/lib/actions/swipe-settings.action";
 
 export default function JobSwipePage() {
   const { user, profile, isLoading: authLoading } = useAuth();
@@ -61,7 +68,11 @@ export default function JobSwipePage() {
   const [savingJobId, setSavingJobId] = useState<string | null>(null);
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
   const [loadingAnalysis, setLoadingAnalysis] = useState(false); // Add loading state for analysis
+  const [swipeSettings, setSwipeSettings] = useState<SwipeAISettings | null>(
+    null
+  );
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null); // Ref to store the debounce timeout
+  const isFetchingRef = useRef(false); // Ref to prevent multiple simultaneous fetches
 
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-15, 15]);
@@ -81,56 +92,245 @@ export default function JobSwipePage() {
     return `${formatter.format(min)} - ${formatter.format(max)}`;
   };
 
+  // Helper function to detect job category and specific job title from job data
+  const detectJobCategory = useCallback(
+    (job: Job): { mainCategory: string; jobTitle?: string } => {
+      try {
+        // Safely extract text content (handle HTML in description)
+        const titleLower = (job.title || "").toLowerCase();
+
+        // Strip HTML tags from description if present
+        let descText = job.description || "";
+        if (typeof descText === "string") {
+          // Remove HTML tags
+          descText = descText.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ");
+        }
+        const descLower = descText.toLowerCase();
+
+        // Safely handle skills array
+        const skillsArray = Array.isArray(job.required_skills)
+          ? job.required_skills
+          : [];
+        const skillsLower = skillsArray
+          .map((s) => String(s || "").toLowerCase())
+          .join(" ");
+
+        const combined = `${titleLower} ${descLower} ${skillsLower}`;
+
+        // First, try to match specific job titles (sub-categories)
+        for (const category of CATEGORY_CONFIG) {
+          if (category.subCategories) {
+            for (const subCategory of category.subCategories) {
+              // Check if any keyword from sub-category matches
+              const matches = subCategory.keywords.some((keyword) => {
+                const regex = new RegExp(
+                  `\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`,
+                  "i"
+                );
+                return regex.test(combined);
+              });
+
+              if (matches) {
+                return { mainCategory: category.id, jobTitle: subCategory.id };
+              }
+            }
+          }
+        }
+
+        // If no specific job title matched, check main categories
+        for (const category of CATEGORY_CONFIG) {
+          const matches = category.keywords.some((keyword) => {
+            const regex = new RegExp(
+              `\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`,
+              "i"
+            );
+            return regex.test(combined);
+          });
+
+          if (matches) {
+            return { mainCategory: category.id };
+          }
+        }
+
+        // Default to IT_SOFTWARE if no match
+        return { mainCategory: "IT_SOFTWARE" };
+      } catch (error) {
+        console.error("Error detecting job category:", error, job);
+        // Return default category on error
+        return { mainCategory: "IT_SOFTWARE" };
+      }
+    },
+    []
+  );
+
+  // Convert priority level to numeric score for sorting
+  const getPriorityScore = (priority: PriorityLevel | undefined): number => {
+    switch (priority) {
+      case PriorityLevel.HIGH:
+        return 3;
+      case PriorityLevel.MEDIUM:
+        return 2;
+      case PriorityLevel.LOW:
+        return 1;
+      default:
+        return 2; // Default to MEDIUM
+    }
+  };
+
+  // Apply AI settings to sort jobs by category priority
+  const applyAISettingsToJobs = useCallback(
+    (jobs: Job[], settings: SwipeAISettings | null): Job[] => {
+      if (!settings || !settings.mainCategoryPriorities) {
+        return jobs;
+      }
+
+      // Calculate priority scores and sort
+      const jobsWithScores = jobs.map((job) => {
+        try {
+          const { mainCategory, jobTitle } = detectJobCategory(job);
+          let priorityScore = 2; // Default to MEDIUM
+
+          // First, check if there's a specific job title priority
+          if (jobTitle && settings.jobTitlePriorities?.[jobTitle]) {
+            priorityScore = getPriorityScore(
+              settings.jobTitlePriorities[jobTitle]
+            );
+          } else {
+            // Otherwise, use the main category priority
+            const mainCategoryPriority =
+              settings.mainCategoryPriorities?.[mainCategory];
+            priorityScore = getPriorityScore(mainCategoryPriority);
+          }
+
+          return { job, score: priorityScore, mainCategory, jobTitle };
+        } catch (error) {
+          console.error("Error calculating score for job:", error, job);
+          // Return job with default score on error
+          return { job, score: 2, mainCategory: "IT_SOFTWARE" };
+        }
+      });
+
+      // Sort by category priority score (highest first: HIGH=3, MEDIUM=2, LOW=1)
+      // Use a stable sort to maintain order for jobs with the same score
+      jobsWithScores.sort((a, b) => {
+        // Primary sort: by score (descending)
+        if (b.score !== a.score) {
+          return b.score - a.score;
+        }
+        // Secondary sort: by main category (for stability)
+        if (a.mainCategory !== b.mainCategory) {
+          return a.mainCategory.localeCompare(b.mainCategory);
+        }
+        // Tertiary sort: maintain original order
+        return 0;
+      });
+
+      return jobsWithScores.map((item) => item.job);
+    },
+    [detectJobCategory]
+  );
+
   // Initialize user swipe data and fetch jobs
-  const fetchJobsAndInitSwipes = useCallback(async () => {
-    if (!user) return;
+  const fetchJobsAndInitSwipes = useCallback(
+    async (overrideSettings?: SwipeAISettings | null) => {
+      if (!user) return;
 
-    setIsLoading(true);
-    try {
-      // First ensure the user has a swipe record
-      await getUserSwipes(user.uid);
+      // Prevent multiple simultaneous fetches
+      if (isFetchingRef.current) {
+        console.log("Already fetching, skipping...");
+        return;
+      }
 
-      // Then get user's liked, disliked, and saved jobs along with available jobs
-      const [jobsResponse, likedResponse, dislikedResponse, savedJobsResponse] =
-        await Promise.all([
+      isFetchingRef.current = true;
+      setIsLoading(true);
+      try {
+        // First ensure the user has a swipe record
+        await getUserSwipes(user.uid);
+
+        // Then get user's liked, disliked, and saved jobs along with available jobs
+        // If overrideSettings is provided, use it; otherwise load from server
+        const [
+          jobsResponse,
+          likedResponse,
+          dislikedResponse,
+          savedJobsResponse,
+          settingsResponse,
+        ] = await Promise.all([
           listJobs(100, JobStatus.OPEN),
           getLikedJobs(user.uid),
           getDislikedJobs(user.uid),
           profile?.role === "GUEST"
             ? getSavedJobs(user.uid)
             : Promise.resolve({ savedJobs: [] }),
+          overrideSettings
+            ? Promise.resolve({ success: true, settings: overrideSettings })
+            : getSwipeAISettings(user.uid),
         ]);
 
-      if (jobsResponse.error) {
-        toast(jobsResponse.error);
-        return;
+        if (jobsResponse.error) {
+          toast(jobsResponse.error);
+          return;
+        }
+
+        // Store user preferences
+        const likedIds = Object.values(likedResponse.jobIds);
+        const dislikedIds = Object.values(dislikedResponse.jobIds);
+        const savedIds =
+          profile?.role === "GUEST"
+            ? savedJobsResponse.savedJobs.map((sj) => sj.job_id)
+            : [];
+
+        setLikedJobIds(likedIds);
+        setDislikedJobIds(dislikedIds);
+        setSavedJobIds(savedIds);
+
+        // Use override settings if provided, otherwise use response settings, otherwise use state
+        const settingsToUse =
+          overrideSettings ||
+          (settingsResponse.success ? settingsResponse.settings : null) ||
+          swipeSettings;
+
+        // Update state with the settings we're using (only if different to avoid unnecessary re-renders)
+        // Use a deep comparison to avoid infinite loops
+        if (settingsToUse) {
+          const currentSettingsStr = JSON.stringify(swipeSettings);
+          const newSettingsStr = JSON.stringify(settingsToUse);
+          if (currentSettingsStr !== newSettingsStr) {
+            setSwipeSettings(settingsToUse);
+          }
+        }
+
+        // Filter out jobs the user has already interacted with
+        const allJobIds = new Set([...likedIds, ...dislikedIds]);
+        let filteredJobs = jobsResponse.jobs.filter(
+          (job) => !allJobIds.has(job.id)
+        );
+
+        // Apply AI settings to sort jobs by category priority
+        filteredJobs = applyAISettingsToJobs(filteredJobs, settingsToUse);
+
+        setDisplayJobs(filteredJobs);
+        setCurrentIndex(0);
+      } catch (error) {
+        console.error("Error initializing job swipes:", error);
+        toast("Failed to load jobs");
+      } finally {
+        setIsLoading(false);
+        isFetchingRef.current = false;
       }
+    },
+    [user, profile, applyAISettingsToJobs]
+  ); // Removed swipeSettings to prevent infinite loop
 
-      // Store user preferences
-      const likedIds = Object.values(likedResponse.jobIds);
-      const dislikedIds = Object.values(dislikedResponse.jobIds);
-      const savedIds =
-        profile?.role === "GUEST"
-          ? savedJobsResponse.savedJobs.map((sj) => sj.job_id)
-          : [];
-
-      setLikedJobIds(likedIds);
-      setDislikedJobIds(dislikedIds);
-      setSavedJobIds(savedIds);
-
-      // Filter out jobs the user has already interacted with
-      const allJobIds = new Set([...likedIds, ...dislikedIds]);
-      const filteredJobs = jobsResponse.jobs.filter(
-        (job) => !allJobIds.has(job.id)
-      );
-
-      setDisplayJobs(filteredJobs);
-      setCurrentIndex(0);
-    } catch (error) {
-      console.error("Error initializing job swipes:", error);
-      toast("Failed to load jobs");
-    } finally {
-      setIsLoading(false);
+  // Load AI settings when user changes
+  useEffect(() => {
+    if (user) {
+      getSwipeAISettings(user.uid).then((response) => {
+        if (response.success && response.settings) {
+          console.log("Loaded swipe settings:", response.settings);
+          setSwipeSettings(response.settings);
+        }
+      });
     }
   }, [user]);
 
@@ -142,7 +342,7 @@ export default function JobSwipePage() {
     }
 
     if (user) {
-      // Fetch jobs and initialize swipes
+      // Fetch jobs and initialize swipes (will use settings if loaded)
       fetchJobsAndInitSwipes();
 
       // Fetch the last analysis result
@@ -283,7 +483,18 @@ export default function JobSwipePage() {
   };
 
   const handleRefresh = () => {
-    fetchJobsAndInitSwipes();
+    // Reload settings first, then refresh jobs
+    if (user) {
+      getSwipeAISettings(user.uid).then((response) => {
+        if (response.success && response.settings) {
+          setSwipeSettings(response.settings);
+        }
+        // Fetch jobs after settings are loaded/updated
+        fetchJobsAndInitSwipes();
+      });
+    } else {
+      fetchJobsAndInitSwipes();
+    }
   };
 
   const handleSaveJob = async (jobId: string) => {
@@ -578,7 +789,26 @@ export default function JobSwipePage() {
             </div>
           </div>
         </div>
-        <div className="w-full md:w-1/3">
+        <div className="w-full md:w-1/3 space-y-4">
+          {/* AI Settings Button */}
+          {user && (
+            <div className="flex justify-end">
+              <SwipeSettingsPanel
+                userId={user.uid}
+                onSettingsChange={async (newSettings) => {
+                  console.log(
+                    "Settings changed, updating and refreshing jobs:",
+                    newSettings
+                  );
+                  // Update state immediately
+                  setSwipeSettings(newSettings);
+                  // Pass new settings directly to avoid stale closure issue
+                  await fetchJobsAndInitSwipes(newSettings);
+                }}
+              />
+            </div>
+          )}
+
           <Card className="border border-blue-100 shadow-md">
             <CardHeader className="bg-gradient-to-r from-blue-50 to-transparent">
               <CardTitle className="text-xl text-slate-800">
