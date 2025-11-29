@@ -11,6 +11,7 @@ import {
   MainCategoryPriorities,
   JobTitlePriorities,
 } from "@/lib/domains/swipe-settings.domain";
+import { FirestoreTimestamp } from "@/lib/domains/base";
 
 // Helper function to get Firestore instance
 function getDb() {
@@ -67,9 +68,7 @@ export async function getSwipeAISettings(
       ...rawData,
     };
 
-    const settingsData = convertTimestamps(
-      settingsWithId
-    ) as SwipeAISettings;
+    const settingsData = convertTimestamps(settingsWithId) as SwipeAISettings;
 
     return {
       success: true,
@@ -79,10 +78,7 @@ export async function getSwipeAISettings(
     console.error("Error getting swipe AI settings:", error);
     return {
       success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Unknown error occurred",
+      error: error instanceof Error ? error.message : "Unknown error occurred",
     };
   }
 }
@@ -114,9 +110,7 @@ export async function saveSwipeAISettings(
     const db = getDb();
     const settingsCollection = "SwipeAISettings";
 
-    const settingsRef = db
-      .collection(settingsCollection)
-      .doc(authedUserId);
+    const settingsRef = db.collection(settingsCollection).doc(authedUserId);
 
     // Get existing settings to merge with defaults
     const existingSnapshot = await settingsRef.get();
@@ -124,7 +118,9 @@ export async function saveSwipeAISettings(
 
     if (existingSnapshot.exists) {
       const rawData = existingSnapshot.data();
-      existingSettings = convertTimestamps(rawData || {}) as Partial<SwipeAISettings>;
+      existingSettings = convertTimestamps(
+        rawData || {}
+      ) as Partial<SwipeAISettings>;
     }
 
     // Merge with defaults, then with existing, then with new settings
@@ -134,7 +130,7 @@ export async function saveSwipeAISettings(
       ...(existingSettings.mainCategoryPriorities || {}),
       ...(settings.mainCategoryPriorities || {}),
     };
-    
+
     const mergedJobTitlePriorities = {
       ...DEFAULT_SWIPE_SETTINGS.jobTitlePriorities,
       ...(existingSettings.jobTitlePriorities || {}),
@@ -146,13 +142,14 @@ export async function saveSwipeAISettings(
       user_id: authedUserId,
       mainCategoryPriorities: mergedMainCategoryPriorities,
       jobTitlePriorities: mergedJobTitlePriorities,
-      updated_at: admin.firestore.FieldValue.serverTimestamp(),
+      updated_at:
+        admin.firestore.FieldValue.serverTimestamp() as unknown as FirestoreTimestamp,
     };
 
     // Ensure created_at is set only if document doesn't exist
     if (!existingSnapshot.exists) {
       mergedSettings.created_at =
-        admin.firestore.FieldValue.serverTimestamp();
+        admin.firestore.FieldValue.serverTimestamp() as unknown as FirestoreTimestamp;
     }
 
     // Use set to ensure complete replacement (not merge which can cause partial updates)
@@ -173,15 +170,20 @@ export async function saveSwipeAISettings(
     };
 
     // Convert back to regular format for response
-    const responseSettings = convertTimestamps(
-      savedWithId
-    ) as SwipeAISettings;
+    const responseSettings = convertTimestamps(savedWithId) as SwipeAISettings;
 
     // Ensure all required fields are present
-    if (!responseSettings.mainCategoryPriorities || !responseSettings.jobTitlePriorities) {
+    if (
+      !responseSettings.mainCategoryPriorities ||
+      !responseSettings.jobTitlePriorities
+    ) {
       // Fallback to defaults if missing
-      responseSettings.mainCategoryPriorities = responseSettings.mainCategoryPriorities || DEFAULT_SWIPE_SETTINGS.mainCategoryPriorities;
-      responseSettings.jobTitlePriorities = responseSettings.jobTitlePriorities || DEFAULT_SWIPE_SETTINGS.jobTitlePriorities;
+      responseSettings.mainCategoryPriorities =
+        responseSettings.mainCategoryPriorities ||
+        DEFAULT_SWIPE_SETTINGS.mainCategoryPriorities;
+      responseSettings.jobTitlePriorities =
+        responseSettings.jobTitlePriorities ||
+        DEFAULT_SWIPE_SETTINGS.jobTitlePriorities;
     }
 
     return {
@@ -192,10 +194,7 @@ export async function saveSwipeAISettings(
     console.error("Error saving swipe AI settings:", error);
     return {
       success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Unknown error occurred",
+      error: error instanceof Error ? error.message : "Unknown error occurred",
     };
   }
 }
@@ -220,7 +219,8 @@ export async function resetSwipeAISettings(): Promise<SwipeAISettingsResponse> {
       user_id: authedUserId,
       mainCategoryPriorities: DEFAULT_SWIPE_SETTINGS.mainCategoryPriorities,
       jobTitlePriorities: DEFAULT_SWIPE_SETTINGS.jobTitlePriorities,
-      updated_at: admin.firestore.FieldValue.serverTimestamp(),
+      updated_at:
+        admin.firestore.FieldValue.serverTimestamp() as unknown as FirestoreTimestamp,
     };
 
     const db = getDb();
@@ -232,7 +232,7 @@ export async function resetSwipeAISettings(): Promise<SwipeAISettingsResponse> {
       defaultSettings.created_at = existingSnapshot.data()?.created_at;
     } else {
       defaultSettings.created_at =
-        admin.firestore.FieldValue.serverTimestamp();
+        admin.firestore.FieldValue.serverTimestamp() as unknown as FirestoreTimestamp;
     }
 
     await settingsRef.set(defaultSettings);
@@ -249,11 +249,7 @@ export async function resetSwipeAISettings(): Promise<SwipeAISettingsResponse> {
     console.error("Error resetting swipe AI settings:", error);
     return {
       success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Unknown error occurred",
+      error: error instanceof Error ? error.message : "Unknown error occurred",
     };
   }
 }
-

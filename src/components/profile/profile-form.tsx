@@ -163,8 +163,8 @@ export default function ProfileForm({
                   <FormLabel>Gender</FormLabel>
                   <Select
                     onValueChange={(value) => field.onChange(parseInt(value))}
-                    defaultValue={field.value.toString()}
-                    value={field.value.toString()}
+                    defaultValue={field.value?.toString()}
+                    value={field.value?.toString()}
                   >
                     <FormControl>
                       <SelectTrigger>

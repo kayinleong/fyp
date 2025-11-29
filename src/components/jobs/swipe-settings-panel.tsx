@@ -19,7 +19,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Settings,
   Loader2,
@@ -56,7 +62,9 @@ export default function SwipeSettingsPanel({
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [settings, setSettings] = useState<SwipeAISettings | null>(null);
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
+    new Set()
+  );
 
   // Load settings when dialog opens
   useEffect(() => {
@@ -97,13 +105,14 @@ export default function SwipeSettingsPanel({
       const response = await saveSwipeAISettings(settingsToSave);
       if (response.success && response.settings) {
         // Update local state with the saved settings
-        setSettings(response.settings);
+        const savedSettings = response.settings;
+        setSettings(savedSettings);
         toast.success("AI settings saved! Refreshing jobs...");
         setOpen(false);
         // Trigger callback to refresh jobs with the saved settings
         // Use a small delay to ensure state is updated
         setTimeout(() => {
-          onSettingsChange?.(response.settings);
+          onSettingsChange?.(savedSettings);
         }, 100);
       } else {
         toast.error(response.error || "Failed to save settings");
@@ -134,7 +143,10 @@ export default function SwipeSettingsPanel({
     }
   };
 
-  const updateMainCategoryPriority = (categoryId: string, value: PriorityLevel) => {
+  const updateMainCategoryPriority = (
+    categoryId: string,
+    value: PriorityLevel
+  ) => {
     if (!settings) return;
     setSettings({
       ...settings,
@@ -180,17 +192,23 @@ export default function SwipeSettingsPanel({
   };
 
   // Always show the button, even if settings aren't loaded yet
-  const currentSettings = settings || {
-    id: userId,
-    user_id: userId,
-    mainCategoryPriorities: DEFAULT_SWIPE_SETTINGS.mainCategoryPriorities,
-    jobTitlePriorities: DEFAULT_SWIPE_SETTINGS.jobTitlePriorities,
-  } as SwipeAISettings;
+  const currentSettings =
+    settings ||
+    ({
+      id: userId,
+      user_id: userId,
+      mainCategoryPriorities: DEFAULT_SWIPE_SETTINGS.mainCategoryPriorities,
+      jobTitlePriorities: DEFAULT_SWIPE_SETTINGS.jobTitlePriorities,
+    } as SwipeAISettings);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default" size="default" className="gap-2 bg-blue-600 hover:bg-blue-700 text-white">
+        <Button
+          variant="default"
+          size="default"
+          className="gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+        >
           <Settings className="h-4 w-4" />
           AI Settings
         </Button>
@@ -202,7 +220,9 @@ export default function SwipeSettingsPanel({
             AI Job Matching Settings
           </DialogTitle>
           <DialogDescription>
-            Set priority level (High, Medium, Low) for job categories. Expand categories to fine-tune specific job titles. Jobs with High priority will appear first.
+            Set priority level (High, Medium, Low) for job categories. Expand
+            categories to fine-tune specific job titles. Jobs with High priority
+            will appear first.
           </DialogDescription>
         </DialogHeader>
 
@@ -215,8 +235,11 @@ export default function SwipeSettingsPanel({
           <div className="w-full space-y-2">
             {CATEGORY_CONFIG.map((category) => {
               const isExpanded = expandedCategories.has(category.id);
-              const mainPriority = currentSettings.mainCategoryPriorities?.[category.id] || PriorityLevel.MEDIUM;
-              const hasSubCategories = category.subCategories && category.subCategories.length > 0;
+              const mainPriority =
+                currentSettings.mainCategoryPriorities?.[category.id] ||
+                PriorityLevel.MEDIUM;
+              const hasSubCategories =
+                category.subCategories && category.subCategories.length > 0;
 
               return (
                 <Card key={category.id} className="overflow-hidden">
@@ -237,14 +260,24 @@ export default function SwipeSettingsPanel({
                             )}
                           </Button>
                         )}
-                        <Label className="text-base font-semibold cursor-pointer" onClick={() => hasSubCategories && toggleCategory(category.id)}>
+                        <Label
+                          className="text-base font-semibold cursor-pointer"
+                          onClick={() =>
+                            hasSubCategories && toggleCategory(category.id)
+                          }
+                        >
                           {category.name}
                         </Label>
                         {getPriorityIcon(mainPriority)}
                       </div>
                       <Select
                         value={mainPriority}
-                        onValueChange={(value) => updateMainCategoryPriority(category.id, value as PriorityLevel)}
+                        onValueChange={(value) =>
+                          updateMainCategoryPriority(
+                            category.id,
+                            value as PriorityLevel
+                          )
+                        }
                       >
                         <SelectTrigger className="w-32">
                           <SelectValue />
@@ -277,16 +310,27 @@ export default function SwipeSettingsPanel({
                       <p className="text-xs text-muted-foreground mt-2 mb-2">
                         Fine-tune priorities for specific job titles (optional):
                       </p>
-                      {category.subCategories.map((subCategory) => {
-                        const jobTitlePriority = currentSettings.jobTitlePriorities?.[subCategory.id] || mainPriority;
+                      {category.subCategories?.map((subCategory) => {
+                        const jobTitlePriority =
+                          currentSettings.jobTitlePriorities?.[
+                            subCategory.id
+                          ] || mainPriority;
                         return (
-                          <div key={subCategory.id} className="flex items-center justify-between py-1">
+                          <div
+                            key={subCategory.id}
+                            className="flex items-center justify-between py-1"
+                          >
                             <Label className="text-sm font-normal text-muted-foreground">
                               {subCategory.name}
                             </Label>
                             <Select
                               value={jobTitlePriority}
-                              onValueChange={(value) => updateJobTitlePriority(subCategory.id, value as PriorityLevel)}
+                              onValueChange={(value) =>
+                                updateJobTitlePriority(
+                                  subCategory.id,
+                                  value as PriorityLevel
+                                )
+                              }
                             >
                               <SelectTrigger className="w-32">
                                 <SelectValue />
