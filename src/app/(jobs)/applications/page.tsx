@@ -34,11 +34,11 @@ function ApplicationsSkeleton() {
   return (
     <div className="space-y-6">
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-        <Skeleton className="h-10 w-20 bg-pink-50" />
-        <Skeleton className="h-10 w-20 bg-pink-50" />
-        <Skeleton className="h-10 w-20 bg-pink-50" />
-        <Skeleton className="h-10 w-20 bg-pink-50" />
-        <Skeleton className="h-10 w-20 bg-pink-50" />
+        <Skeleton className="h-10 w-20 bg-blue-50" />
+        <Skeleton className="h-10 w-20 bg-blue-50" />
+        <Skeleton className="h-10 w-20 bg-blue-50" />
+        <Skeleton className="h-10 w-20 bg-blue-50" />
+        <Skeleton className="h-10 w-20 bg-blue-50" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -47,15 +47,15 @@ function ApplicationsSkeleton() {
           .map((_, i) => (
             <div
               key={i}
-              className="border border-pink-100 rounded-lg p-4 space-y-4 bg-white shadow-sm hover:shadow-md transition-shadow"
+              className="border border-blue-100 rounded-lg p-4 space-y-4 bg-white shadow-sm hover:shadow-md transition-shadow"
             >
               <div className="space-y-2">
-                <Skeleton className="h-5 w-3/4 bg-pink-50" />
-                <Skeleton className="h-4 w-1/2 bg-pink-50" />
+                <Skeleton className="h-5 w-3/4 bg-blue-50" />
+                <Skeleton className="h-4 w-1/2 bg-blue-50" />
               </div>
               <div className="flex justify-between items-center">
-                <Skeleton className="h-6 w-20 bg-pink-50" />
-                <Skeleton className="h-8 w-8 rounded-full bg-pink-50" />
+                <Skeleton className="h-6 w-20 bg-blue-50" />
+                <Skeleton className="h-8 w-8 rounded-full bg-blue-50" />
               </div>
             </div>
           ))}
