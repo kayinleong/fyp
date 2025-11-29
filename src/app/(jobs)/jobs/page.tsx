@@ -8,7 +8,7 @@ import { Briefcase, Search } from "lucide-react";
 export default function JobsPage({ searchParams }: { searchParams: any }) {
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Header with decorative pink elements */}
+      {/* Header with decorative blue elements */}
       <div className="mb-8 relative">
         <div className="flex items-center gap-3 mb-2">
           <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-600 text-sm font-medium">
@@ -60,21 +60,21 @@ function JobListSkeleton() {
         .map((_, i) => (
           <div
             key={i}
-            className="border border-pink-100 rounded-lg p-6 space-y-4 bg-white shadow-sm hover:shadow-md transition-shadow"
+            className="border border-blue-100 rounded-lg p-6 space-y-4 bg-white shadow-sm hover:shadow-md transition-shadow"
           >
             <div className="flex items-start justify-between">
               <div className="space-y-2">
-                <Skeleton className="h-6 w-48 bg-pink-100" />
-                <Skeleton className="h-4 w-32 bg-pink-50" />
+                <Skeleton className="h-6 w-48 bg-blue-100" />
+                <Skeleton className="h-4 w-32 bg-blue-50" />
               </div>
-              <Skeleton className="h-10 w-24 bg-pink-100" />
+              <Skeleton className="h-10 w-24 bg-blue-100" />
             </div>
-            <Skeleton className="h-4 w-full bg-pink-50" />
-            <Skeleton className="h-4 w-full bg-pink-50" />
+            <Skeleton className="h-4 w-full bg-blue-50" />
+            <Skeleton className="h-4 w-full bg-blue-50" />
             <div className="flex flex-wrap gap-2 mt-4">
-              <Skeleton className="h-6 w-16 bg-pink-100 rounded-full" />
-              <Skeleton className="h-6 w-20 bg-pink-100 rounded-full" />
-              <Skeleton className="h-6 w-24 bg-pink-100 rounded-full" />
+              <Skeleton className="h-6 w-16 bg-blue-100 rounded-full" />
+              <Skeleton className="h-6 w-20 bg-blue-100 rounded-full" />
+              <Skeleton className="h-6 w-24 bg-blue-100 rounded-full" />
             </div>
           </div>
         ))}
