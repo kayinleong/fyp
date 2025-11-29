@@ -48,6 +48,7 @@ const formSchema = z.object({
   type: z.string().min(1, "Job type is required"),
   company_name: z.string().min(1, "Company name is required"),
   company_location: z.string().min(1, "Location is required"),
+  currency: z.string(),
   minimum_salary: z.coerce.number().positive("Salary must be positive"),
   maximum_salary: z.coerce.number().positive("Salary must be positive"),
   application_dateline: z.date().optional(),
@@ -97,6 +98,7 @@ export default function NewJobForm() {
       type: "",
       company_name: "",
       company_location: "",
+      currency: "USD",
       minimum_salary: 0,
       maximum_salary: 0,
       is_remote: false,
@@ -246,10 +248,43 @@ export default function NewJobForm() {
 
               <FormField
                 control={form.control}
+                name="currency"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Currency</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select currency" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="USD">USD ($)</SelectItem>
+                        <SelectItem value="EUR">EUR (€)</SelectItem>
+                        <SelectItem value="GBP">GBP (£)</SelectItem>
+                        <SelectItem value="SGD">SGD (S$)</SelectItem>
+                        <SelectItem value="MYR">MYR (RM)</SelectItem>
+                        <SelectItem value="AUD">AUD (A$)</SelectItem>
+                        <SelectItem value="CAD">CAD (C$)</SelectItem>
+                        <SelectItem value="JPY">JPY (¥)</SelectItem>
+                        <SelectItem value="CNY">CNY (¥)</SelectItem>
+                        <SelectItem value="INR">INR (₹)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="minimum_salary"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Minimum Salary ($)*</FormLabel>
+                    <FormLabel>Minimum Salary</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} />
                     </FormControl>
@@ -263,7 +298,7 @@ export default function NewJobForm() {
                 name="maximum_salary"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Maximum Salary ($)*</FormLabel>
+                    <FormLabel>Maximum Salary</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} />
                     </FormControl>

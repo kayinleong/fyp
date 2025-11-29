@@ -3,11 +3,16 @@
 import getStripe from "@/lib/firebase/stripe";
 import { getFirestore } from "firebase-admin/firestore";
 import admin from "@/lib/firebase/server";
-import { SubscriptionPlan } from "@/lib/domains/subscription.domain";
+import {
+  SubscriptionPlan,
+  SUBSCRIPTION_PLANS,
+} from "@/lib/domains/subscription.domain";
 import { headers } from "next/headers";
 import { validateSession } from "@/lib/actions/auth.action";
 import { checkPremiumAccess } from "@/lib/actions/subscription.action";
 import { getProfileById } from "@/lib/actions/profile.action";
+import { sendEmail } from "./smtp.action";
+import { getSubscriptionUpgradeTemplate } from "../utils/email-templates";
 
 function getDb() {
   return getFirestore();
@@ -143,14 +148,53 @@ export async function handleCheckoutSessionCompleted(
 
     // Check if subscription exists to determine if we need to set created_at
     const subSnap = await subscriptionRef.get();
+    let shouldSendEmail = false;
 
     if (!subSnap.exists) {
       await subscriptionRef.set({
         ...subscriptionData,
         created_at: admin.firestore.FieldValue.serverTimestamp(),
       });
+      shouldSendEmail = true;
     } else {
+      const currentData = subSnap.data();
+
+      // Check if we are effectively updating anything important
+      // If it's the same subscription session and it's already active, we've likely already processed this.
+      const isSameSubscription =
+        currentData?.stripe_subscription_id === session.subscription;
+      const isAlreadyActive = currentData?.status === "ACTIVE";
+
+      if (!isSameSubscription || !isAlreadyActive) {
+        shouldSendEmail = true;
+      }
+
       await subscriptionRef.update(subscriptionData);
+    }
+
+    // Send welcome email only if it's a new activation
+    if (shouldSendEmail) {
+      try {
+        if (userEmail) {
+          const planName =
+            SUBSCRIPTION_PLANS[planType as SubscriptionPlan]?.name ||
+            "Premium Plan";
+
+          const { subject, html } = getSubscriptionUpgradeTemplate(
+            userDisplayName || "Subscriber",
+            planName,
+            expiresAt
+          );
+
+          await sendEmail({
+            to: userEmail,
+            subject,
+            html,
+          });
+        }
+      } catch (emailError) {
+        console.error("Failed to send subscription welcome email:", emailError);
+      }
     }
 
     return { success: true };

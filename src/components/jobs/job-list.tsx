@@ -33,7 +33,10 @@ export default async function JobList({
           location: searchParams.location || undefined,
           company: searchParams.company || undefined,
           skills: searchParams.skills
-            ? searchParams.skills.split(",").map(s => s.trim()).filter(Boolean)
+            ? searchParams.skills
+                .split(",")
+                .map((s) => s.trim())
+                .filter(Boolean)
             : undefined,
           jobType: searchParams.jobType || undefined,
           status: JobStatus.OPEN,
@@ -73,6 +76,19 @@ export default async function JobList({
               <p className="text-muted-foreground">
                 {job.company_name} • {job.company_location}
                 {job.is_remote && " • Remote"}
+              </p>
+              <p className="text-sm font-medium mt-1 text-slate-600">
+                {new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: job.currency || "USD",
+                  maximumFractionDigits: 0,
+                }).format(job.minimum_salary)}{" "}
+                -{" "}
+                {new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: job.currency || "USD",
+                  maximumFractionDigits: 0,
+                }).format(job.maximum_salary)}
               </p>
             </div>
             <Link href={`/jobs/${job.id}`}>
