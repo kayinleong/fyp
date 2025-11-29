@@ -74,6 +74,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import ThreeDFace from "@/components/mock-interview/three-d-face";
+import HeadTracker from "@/components/mock-interview/head-tracker";
 
 export default function MockInterviewPage() {
   const [step, setStep] = useState<"setup" | "interview" | "feedback">("setup");
@@ -93,6 +95,9 @@ export default function MockInterviewPage() {
   const [pendingInterviewData, setPendingInterviewData] =
     useState<InterviewSetup | null>(null);
   const [isLoadingFacialData, setIsLoadingFacialData] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
+  const [headRotation, setHeadRotation] = useState({ x: 0, y: 0, z: 0 });
+  const [eyePosition, setEyePosition] = useState({ x: 0, y: 0 });
 
   // Speech synthesis
   const { isSupported, isSpeaking, speak, cancel } = useSpeech();
@@ -123,8 +128,16 @@ export default function MockInterviewPage() {
     if (isSpeaking) {
       cancel();
     }
+
+    // Auto-read question when moving to next question if interview has started
+    if (step === "interview" && hasStarted && questions[currentQuestion]) {
+      const timer = setTimeout(() => {
+        speak(questions[currentQuestion].question);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentQuestion, step]);
+  }, [currentQuestion, step, hasStarted]);
 
   // Fetch user profile when component mounts
   useEffect(() => {
@@ -505,39 +518,32 @@ export default function MockInterviewPage() {
                 )}
               </CardHeader>
               <CardContent className="space-y-6 relative z-10">
-                <div className="bg-blue-50 p-6 rounded-xl relative">
-                  <div className="flex items-start justify-between">
-                    <p className="font-medium pr-10 text-slate-800">
-                      {questions[currentQuestion].question}
-                    </p>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="flex-shrink-0 text-blue-600 hover:bg-blue-100"
-                          >
-                            <HelpCircle className="h-5 w-5" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-xs">
-                          <p>{questions[currentQuestion].hint}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[500px]">
+                  {/* AI Interviewer */}
+                  <div className="md:col-span-2 h-full bg-blue-50 rounded-xl overflow-hidden border border-blue-100 relative">
+                    <ThreeDFace
+                      isSpeaking={isSpeaking}
+                      rotation={headRotation}
+                      eyePosition={eyePosition}
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 bg-white/90 p-4 backdrop-blur-sm border-t border-blue-100">
+                      <p className="text-sm font-medium text-slate-800 text-center">
+                        {questions[currentQuestion].question}
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                <div className="bg-gray-50 p-6 rounded-xl">
-                  <div className="flex items-start justify-between mb-2">
-                    <Label className="text-slate-700 font-semibold">
-                      Hint:
-                    </Label>
+                  {/* User Camera */}
+                  <div className="h-full relative">
+                    <HeadTracker
+                      onHeadMove={setHeadRotation}
+                      onEyeMove={setEyePosition}
+                      className="w-full h-full border border-slate-200 shadow-sm"
+                    />
+                    <div className="absolute top-2 left-2 bg-black/50 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full">
+                      You
+                    </div>
                   </div>
-                  <p className="text-sm text-slate-600 italic">
-                    {questions[currentQuestion].hint}
-                  </p>
                 </div>
 
                 <div className="border rounded-xl p-6 min-h-[150px] relative">
@@ -730,6 +736,31 @@ export default function MockInterviewPage() {
           </DialogContent>
         </Dialog>
       )}
+
+      <Dialog open={step === "interview" && !hasStarted}>
+        <DialogContent
+          className="sm:max-w-md"
+          onInteractOutside={(e) => e.preventDefault()}
+        >
+          <DialogHeader>
+            <DialogTitle>Ready to Start?</DialogTitle>
+            <DialogDescription>
+              Click the button below to start the interview. The AI interviewer
+              will read the question aloud.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center py-6">
+            <Button
+              onClick={() => {
+                setHasStarted(true);
+              }}
+              className="w-full bg-blue-600 hover:bg-blue-700"
+            >
+              Start Interview
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
