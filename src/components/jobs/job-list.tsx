@@ -9,7 +9,7 @@ import { Button } from "../ui/button";
 export default async function JobList({
   searchParams,
 }: {
-  searchParams?: {
+  searchParams?: Promise<{
     remote?: string;
     minSalary?: string;
     maxSalary?: string;
@@ -17,28 +17,31 @@ export default async function JobList({
     company?: string;
     skills?: string;
     jobType?: string;
-  };
+  }>;
 }) {
+  // Await searchParams if it's a Promise (Next.js 15+)
+  const params = searchParams ? await searchParams : undefined;
+  
   // Handle either filtering or listing all jobs
   const { jobs, error } =
-    searchParams && Object.keys(await searchParams).length > 0
+    params && Object.keys(params).length > 0
       ? await filterJobs({
-          isRemote: searchParams.remote === "true",
-          minSalary: searchParams.minSalary
-            ? parseInt(searchParams.minSalary)
+          isRemote: params.remote === "true",
+          minSalary: params.minSalary
+            ? parseInt(params.minSalary)
             : undefined,
-          maxSalary: searchParams.maxSalary
-            ? parseInt(searchParams.maxSalary)
+          maxSalary: params.maxSalary
+            ? parseInt(params.maxSalary)
             : undefined,
-          location: searchParams.location || undefined,
-          company: searchParams.company || undefined,
-          skills: searchParams.skills
-            ? searchParams.skills
+          location: params.location || undefined,
+          company: params.company || undefined,
+          skills: params.skills
+            ? params.skills
                 .split(",")
                 .map((s) => s.trim())
                 .filter(Boolean)
             : undefined,
-          jobType: searchParams.jobType || undefined,
+          jobType: params.jobType || undefined,
           status: JobStatus.OPEN,
         })
       : await listJobs(20, JobStatus.OPEN);
