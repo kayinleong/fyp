@@ -5,18 +5,29 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatCurrency(amount: number, currency: string) {
-  if (!currency) {
-    return new Intl.NumberFormat("en-US").format(amount);
-  }
+export function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
 
-  try {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency,
-    }).format(amount);
-  } catch (error) {
-    // Fallback if currency code is invalid
-    return `${new Intl.NumberFormat("en-US").format(amount)} ${currency}`;
-  }
+/**
+ * Format a date with options
+ */
+export function formatDate(
+  date: Date | number,
+  options: Intl.DateTimeFormatOptions = {}
+) {
+  const defaultOptions: Intl.DateTimeFormatOptions = {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    ...options,
+  };
+
+  return new Intl.DateTimeFormat("en-US", defaultOptions).format(date);
 }
