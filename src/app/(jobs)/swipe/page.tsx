@@ -83,13 +83,8 @@ export default function JobSwipePage() {
   const dragConstraintsRef = useRef(null);
 
   // Format salary for display
-  const formatSalary = (min: number, max: number, currency: string = "USD") => {
-    const formatter = new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: currency,
-      maximumFractionDigits: 0,
-    });
-    return `${formatter.format(min)} - ${formatter.format(max)}`;
+  const formatSalary = (min: number, max: number, currency: string = "MYR") => {
+    return `RM ${min.toLocaleString()} - RM ${max.toLocaleString()}`;
   };
 
   // Helper function to detect job category and specific job title from job data

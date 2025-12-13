@@ -4,6 +4,7 @@ import { getFirestore } from "firebase-admin/firestore";
 import { Job, JobStatus } from "@/lib/domains/jobs.domain";
 import admin from "@/lib/firebase/server";
 import { convertTimestamps } from "../timestamp";
+import { normalizeCurrency } from "@/lib/utils";
 
 // Helper function to get Firestore instance
 function getDb() {
@@ -32,6 +33,7 @@ export interface JobFilterParams {
     skills?: string[];
     jobType?: string;
     company?: string;
+    currency?: string;
     limit?: number;
     status?: JobStatus;
 }
@@ -351,6 +353,7 @@ export async function filterJobs(filterParams: JobFilterParams): Promise<JobsRes
             jobType,
             location,
             company,
+            currency,
             limit = 20,
             status = JobStatus.OPEN
         } = filterParams;
@@ -416,6 +419,23 @@ export async function filterJobs(filterParams: JobFilterParams): Promise<JobsRes
                     )
                 );
             });
+        }
+
+        // Filter by currency if provided (only return jobs posted in the selected currency)
+        if (currency && currency.trim() !== "") {
+            const normFilter = normalizeCurrency(currency);
+            if (normFilter) {
+                filteredJobs = filteredJobs.filter(job => {
+                    const jobCur = normalizeCurrency(job.currency as string | null);
+                    // Include the job if its normalized currency matches the filter
+                    if (jobCur === normFilter) return true;
+                    // Special case: many existing jobs may have no currency stored
+                    // but were displayed as RM previously. Treat missing currency
+                    // as MYR when the user filters for MYR so older posts still appear.
+                    if (!jobCur && normFilter === "MYR") return true;
+                    return false;
+                });
+            }
         }
 
         // Sort by creation date (descending)

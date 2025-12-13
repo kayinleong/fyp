@@ -5,6 +5,7 @@ import { formatDistanceToNow } from "date-fns";
 import { Skeleton } from "../ui/skeleton";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
+import { formatCurrency, normalizeCurrency } from "@/lib/utils";
 
 export default async function JobList({
   searchParams,
@@ -17,6 +18,7 @@ export default async function JobList({
     company?: string;
     skills?: string;
     jobType?: string;
+    currency?: string;
   }>;
 }) {
   // Await searchParams if it's a Promise (Next.js 15+)
@@ -42,6 +44,7 @@ export default async function JobList({
                 .filter(Boolean)
             : undefined,
           jobType: params.jobType || undefined,
+              currency: params.currency || undefined,
           status: JobStatus.OPEN,
         })
       : await listJobs(20, JobStatus.OPEN);
@@ -81,17 +84,13 @@ export default async function JobList({
                 {job.is_remote && " • Remote"}
               </p>
               <p className="text-sm font-medium mt-1 text-slate-600">
-                {new Intl.NumberFormat("en-US", {
-                  style: "currency",
-                  currency: job.currency || "USD",
-                  maximumFractionDigits: 0,
-                }).format(job.minimum_salary)}{" "}
-                -{" "}
-                {new Intl.NumberFormat("en-US", {
-                  style: "currency",
-                  currency: job.currency || "USD",
-                  maximumFractionDigits: 0,
-                }).format(job.maximum_salary)}
+                {formatCurrency(
+                  job.minimum_salary,
+                  normalizeCurrency(job.currency) || job.currency
+                )} - {formatCurrency(
+                  job.maximum_salary,
+                  normalizeCurrency(job.currency) || job.currency
+                )}
               </p>
             </div>
             <Link href={`/jobs/${job.id}`}>

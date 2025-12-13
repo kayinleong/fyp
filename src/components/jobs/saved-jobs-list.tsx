@@ -97,12 +97,7 @@ export default function SavedJobsList({ userId }: SavedJobsListProps) {
   };
 
   const formatSalary = (min: number, max: number) => {
-    const formatter = new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0,
-    });
-    return `${formatter.format(min)} - ${formatter.format(max)}`;
+    return `RM ${min.toLocaleString()} - RM ${max.toLocaleString()}`;
   };
 
   return (

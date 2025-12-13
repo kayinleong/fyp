@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Label } from "../ui/label";
 import { Checkbox } from "../ui/checkbox";
 import { Button } from "../ui/button";
-import { Slider } from "../ui/slider";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function JobFilters() {
@@ -15,15 +14,32 @@ export default function JobFilters() {
   const [isRemote, setIsRemote] = useState(
     searchParams.get("remote") === "true"
   );
-  const [salaryRange, setSalaryRange] = useState([
-    parseInt(searchParams.get("minSalary") || "0"),
-    parseInt(searchParams.get("maxSalary") || "200000"),
+  const [salaryRange, setSalaryRange] = useState<(number | string)[]>([
+    searchParams.get("minSalary") ? parseInt(searchParams.get("minSalary") || "0") : ("" as string),
+    searchParams.get("maxSalary") ? parseInt(searchParams.get("maxSalary") || "200000") : ("" as string),
   ]);
+  const [currency, setCurrency] = useState<string>(
+    (searchParams.get("currency") as string) || ""
+  );
   const [location, setLocation] = useState(searchParams.get("location") || "");
   const [company, setCompany] = useState(searchParams.get("company") || "");
   const [skills, setSkills] = useState(searchParams.get("skills") || "");
   const [jobType, setJobType] = useState(searchParams.get("jobType") || "");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Keep local state in sync when the URL search params change (e.g. after navigation)
+  useEffect(() => {
+    setIsRemote(searchParams.get("remote") === "true");
+    setSalaryRange([
+      searchParams.get("minSalary") ? parseInt(searchParams.get("minSalary") || "0") : ("" as string),
+      searchParams.get("maxSalary") ? parseInt(searchParams.get("maxSalary") || "200000") : ("" as string),
+    ]);
+    setCurrency((searchParams.get("currency") as string) || "");
+    setLocation(searchParams.get("location") || "");
+    setCompany(searchParams.get("company") || "");
+    setSkills(searchParams.get("skills") || "");
+    setJobType(searchParams.get("jobType") || "");
+  }, [searchParams?.toString()]);
 
   const handleFilter = async () => {
     setIsLoading(true);
@@ -32,8 +48,9 @@ export default function JobFilters() {
       // Create URL with filter parameters
       const params = new URLSearchParams();
       if (isRemote) params.set("remote", "true");
-      params.set("minSalary", salaryRange[0].toString());
-      params.set("maxSalary", salaryRange[1].toString());
+      if (salaryRange[0] !== "") params.set("minSalary", salaryRange[0].toString());
+      if (salaryRange[1] !== "") params.set("maxSalary", salaryRange[1].toString());
+      if (currency && currency.trim() !== "") params.set("currency", currency);
       if (location.trim() !== "") params.set("location", location.trim());
       if (company.trim() !== "") params.set("company", company.trim());
 
@@ -49,6 +66,20 @@ export default function JobFilters() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleReset = () => {
+    // Reset all local filter state to defaults
+    setIsRemote(false);
+    setSalaryRange(["", ""]);
+    setLocation("");
+    setCompany("");
+    setSkills("");
+    setJobType("");
+    setCurrency("");
+
+    // Navigate to base jobs page (clears URL params)
+    router.push(`/jobs`);
   };
 
 
@@ -118,24 +149,81 @@ export default function JobFilters() {
 
         <div className="space-y-2">
           <Label>Salary Range</Label>
-          <div className="pt-4">
-            <Slider
-              min={0}
-              max={200000}
-              step={5000}
-              value={salaryRange}
-              onValueChange={(value) => setSalaryRange(value as number[])}
-            />
-          </div>
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>${salaryRange[0].toLocaleString()}</span>
-            <span>${salaryRange[1].toLocaleString()}</span>
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">Currency</Label>
+              <select
+                className="w-full border rounded px-3 py-2 text-sm"
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value)}
+              >
+                <option value="">Any</option>
+                <option value="USD">USD ($)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="GBP">GBP (£)</option>
+                <option value="SGD">SGD (S$)</option>
+                <option value="MYR">MYR (RM)</option>
+                <option value="AUD">AUD (A$)</option>
+                <option value="CAD">CAD (C$)</option>
+                <option value="JPY">JPY (¥)</option>
+                <option value="CNY">CNY (¥)</option>
+                <option value="INR">INR (₹)</option>
+              </select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1 min-w-0">
+                <Label htmlFor="minSalary" className="text-xs text-muted-foreground">
+                  Minimum ({currency || "Any"})
+                </Label>
+                <input
+                  id="minSalary"
+                  type="number"
+                  min="0"
+                  className="w-full min-w-0 border rounded px-3 py-2 text-sm"
+                  placeholder={`Min (${currency || "Any"})`}
+                  value={salaryRange[0] === "" ? "" : salaryRange[0]}
+                  onChange={(e) => {
+                    const value = e.target.value === "" ? "" : (parseInt(e.target.value) || "");
+                    setSalaryRange([value, salaryRange[1]]);
+                  }}
+                />
+              </div>
+
+              <div className="space-y-1 min-w-0">
+                <Label htmlFor="maxSalary" className="text-xs text-muted-foreground">
+                  Maximum ({currency || "Any"})
+                </Label>
+                <input
+                  id="maxSalary"
+                  type="number"
+                  min="0"
+                  className="w-full min-w-0 border rounded px-3 py-2 text-sm"
+                  placeholder={`Max (${currency || "Any"})`}
+                  value={salaryRange[1] === "" ? "" : salaryRange[1]}
+                  onChange={(e) => {
+                    const value = e.target.value === "" ? "" : (parseInt(e.target.value) || "");
+                    setSalaryRange([salaryRange[0], value]);
+                  }}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <Button onClick={handleFilter} className="w-full" disabled={isLoading}>
-        {isLoading ? "Applying..." : "Apply Filters"}
-      </Button>
+      <div className="flex gap-3">
+        <Button
+          variant="outline"
+          onClick={handleReset}
+          className="flex-1"
+          disabled={isLoading}
+        >
+          Reset
+        </Button>
+        <Button onClick={handleFilter} className="flex-1" disabled={isLoading}>
+          {isLoading ? "Applying..." : "Apply Filters"}
+        </Button>
+      </div>
     </div>
   );
 }
