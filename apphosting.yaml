@@ -32,7 +32,7 @@ env:
     value: G-DFGK6KQW62
 
   - variable: NEXT_PUBLIC_DEEPFACE_REQUIRED
-    value: true
+    value: false
 
   - variable: NEXT_PUBLIC_DEEPFACE_HEALTH_URL
     value: https://health-check-blentyzzyq-uc.a.run.app

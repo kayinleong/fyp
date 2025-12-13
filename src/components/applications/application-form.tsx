@@ -233,26 +233,7 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
       }
 
       // Convert experience string to number
-      let yearsOfExperience = 0;
-      switch (experience) {
-        case "0-1":
-          yearsOfExperience = 1;
-          break;
-        case "1-3":
-          yearsOfExperience = 2;
-          break;
-        case "3-5":
-          yearsOfExperience = 4;
-          break;
-        case "5-10":
-          yearsOfExperience = 7;
-          break;
-        case "10+":
-          yearsOfExperience = 10;
-          break;
-        default:
-          yearsOfExperience = 0;
-      }
+      const yearsOfExperience = parseInt(experience);
 
       // Create the application in Firestore with the resume URL
       const response = await createApplication({
@@ -410,18 +391,26 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
 
       <div className="space-y-2">
         <Label htmlFor="experience">Years of Experience</Label>
-        <Select value={experience} onValueChange={setExperience} required>
+        <Input
+          id="experience"
+          type="text"
+          placeholder="1"
+          value={experience}
+          onChange={(e) => setExperience(e.target.value)}
+          required
+        />
+        {/* <Select value={experience} onValueChange={setExperience} required>
           <SelectTrigger id="experience">
             <SelectValue placeholder="Select experience" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="0-1">0-1 years</SelectItem>
+            <SelectItem value="0-1">1years</SelectItem>
             <SelectItem value="1-3">1-3 years</SelectItem>
             <SelectItem value="3-5">3-5 years</SelectItem>
             <SelectItem value="5-10">5-10 years</SelectItem>
             <SelectItem value="10+">10+ years</SelectItem>
           </SelectContent>
-        </Select>
+        </Select> */}
       </div>
 
       <div className="space-y-3">

@@ -312,8 +312,12 @@ export default function JobApplicationsList({
                       <Info className="h-4 w-4" />
                     </Button>
                     <Button variant="outline" size="icon" asChild>
-                      <Link 
-                        href={application.resume_id ? `/resumes/view/${application.resume_id}` : application.resume_path} 
+                      <Link
+                        href={
+                          application.resume_id
+                            ? `/resumes/view/${application.resume_id}`
+                            : application.resume_path
+                        }
                         target="_blank"
                       >
                         <FileText className="h-4 w-4" />
@@ -386,20 +390,6 @@ export default function JobApplicationsList({
                           className="text-red-600"
                         >
                           Reject
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          disabled={
-                            application.status === ApplicationStatus.CANCELLED
-                          }
-                          onClick={() =>
-                            confirmStatusChange(
-                              application,
-                              ApplicationStatus.CANCELLED
-                            )
-                          }
-                          className="text-gray-600"
-                        >
-                          Cancel
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
