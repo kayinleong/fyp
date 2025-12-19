@@ -28,7 +28,12 @@ export default async function JobDetailsPage({ params }: { params: any }) {
   }
 
   // Helper function to format salary range
-  const formatSalary = (min: number, max: number, currency: string = "USD") => {
+  const formatSalary = (min: number, max: number, currency: string = "MYR") => {
+    return `RM ${min.toLocaleString()} - RM ${max.toLocaleString()}`;
+  };
+
+  // Old formatter (kept for reference)
+  const _oldFormatter = (min: number, max: number, currency: string = "MYR") => {
     const formatter = new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: currency,

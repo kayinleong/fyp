@@ -7,8 +7,13 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatCurrency(
   amount: number,
-  currency: string = "USD"
+  currency: string = "MYR"
 ): string {
+  // For MYR, use custom format with RM prefix
+  if (currency === "MYR" || !currency) {
+    return `RM ${amount.toLocaleString()}`;
+  }
+  // For other currencies, use Intl formatter
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: currency,
@@ -33,4 +38,42 @@ export function formatDate(
   };
 
   return new Intl.DateTimeFormat("en-US", defaultOptions).format(date);
+}
+
+/**
+ * Normalize various currency representations to ISO-style codes used in the app.
+ * Examples: 'RM' -> 'MYR', 'myr' -> 'MYR', '$' -> 'USD' (if ambiguous, leave as-is)
+ */
+export function normalizeCurrency(input?: string | null): string | undefined {
+  if (!input) return undefined;
+  const raw = input.trim();
+  if (raw === "") return undefined;
+
+  const upper = raw.toUpperCase();
+
+  // Common aliases
+  const map: Record<string, string> = {
+    RM: "MYR",
+    MYR: "MYR",
+    USD: "USD",
+    EUR: "EUR",
+    GBP: "GBP",
+    SGD: "SGD",
+    SGD: "SGD",
+    AUD: "AUD",
+    CAD: "CAD",
+    CNY: "CNY",
+    JPY: "JPY",
+    INR: "INR",
+  };
+
+  // Remove common currency punctuation and whitespace
+  const cleaned = upper.replace(/[^A-Z0-9]/g, "");
+
+  if (map[cleaned]) return map[cleaned];
+
+  // Fallback: if cleaned is 3 letters, return as-is
+  if (/^[A-Z]{3}$/.test(cleaned)) return cleaned;
+
+  return undefined;
 }

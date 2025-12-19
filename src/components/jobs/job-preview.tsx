@@ -23,11 +23,11 @@ interface JobPreviewProps {
 export default function JobPreview({ job }: JobPreviewProps) {
   const formatSalary = () => {
     if (job.minSalary && job.maxSalary) {
-      return `$${job.minSalary.toLocaleString()} - $${job.maxSalary.toLocaleString()}`;
+      return `RM ${job.minSalary.toLocaleString()} - RM ${job.maxSalary.toLocaleString()}`;
     } else if (job.minSalary) {
-      return `From $${job.minSalary.toLocaleString()}`;
+      return `From RM ${job.minSalary.toLocaleString()}`;
     } else if (job.maxSalary) {
-      return `Up to $${job.maxSalary.toLocaleString()}`;
+      return `Up to RM ${job.maxSalary.toLocaleString()}`;
     }
     return "Not specified";
   };
