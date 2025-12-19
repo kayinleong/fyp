@@ -59,7 +59,6 @@ export function normalizeCurrency(input?: string | null): string | undefined {
     EUR: "EUR",
     GBP: "GBP",
     SGD: "SGD",
-    SGD: "SGD",
     AUD: "AUD",
     CAD: "CAD",
     CNY: "CNY",
